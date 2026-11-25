@@ -5,13 +5,16 @@ import Link from "next/link";
 import { STORE } from "@/lib/config";
 import { getSupabase } from "@/lib/supabase";
 import { clean, EMAIL_RE, LIMITS } from "@/lib/security";
+import { Honeypot } from "@/components/honeypot";
 
 export function Footer() {
   const [email, setEmail] = useState("");
   const [msg, setMsg] = useState("");
+  const [trap, setTrap] = useState("");
 
   const subscribe = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (trap) return setMsg("¡Gracias por suscribirte!"); // honeypot
     const value = clean(email, LIMITS.email).toLowerCase();
     if (!EMAIL_RE.test(value)) return setMsg("Ingresá un email válido.");
     const sb = getSupabase();
@@ -33,6 +36,7 @@ export function Footer() {
             <li><Link href="/info#faq">Preguntas frecuentes</Link></li>
             <li><Link href="/info#devoluciones">Política de devolución</Link></li>
             <li><Link href="/info#terminos">Términos y condiciones</Link></li>
+            <li><Link href="/info#privacidad">Política de privacidad</Link></li>
           </ul>
         </div>
         <div>
@@ -45,7 +49,8 @@ export function Footer() {
         </div>
         <div>
           <h4 className="mb-3 font-bold tracking-wider uppercase">Newsletter</h4>
-          <form onSubmit={subscribe} className="flex">
+          <form onSubmit={subscribe} className="relative flex">
+            <Honeypot value={trap} onChange={setTrap} />
             <input
               type="email"
               required
@@ -59,6 +64,12 @@ export function Footer() {
           </form>
           {msg && <p className="mt-2 text-xs">{msg}</p>}
         </div>
+      </div>
+      <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 border-t border-neutral-200 py-4 text-[11px] font-semibold tracking-wider uppercase">
+        <a href="https://www.argentina.gob.ar/produccion/defensadelconsumidor/formulario" target="_blank" rel="noopener noreferrer" className="hover:underline">
+          Defensa de las y los consumidores. Para reclamos ingresá acá
+        </a>
+        <Link href="/arrepentimiento" className="underline">Botón de arrepentimiento</Link>
       </div>
       <p className="border-t border-neutral-200 py-4 text-center text-[11px] tracking-wider text-neutral-500 uppercase">
         Copyright {STORE.name} - {new Date().getFullYear()}. Proyecto de portfolio · Next.js + Supabase + Vercel

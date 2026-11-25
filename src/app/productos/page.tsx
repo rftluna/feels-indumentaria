@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getCategories, getProducts } from "@/lib/data";
 import { ProductCard } from "@/components/product-card";
 
-export const metadata = { title: "Productos" };
+export const metadata = { title: "Productos", description: "Buzos, remeras, musculosas y shorts oversize. Promos comprando 2 o más." };
 
 export default async function ProductsPage({
   searchParams,

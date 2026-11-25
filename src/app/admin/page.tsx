@@ -8,6 +8,8 @@ import { ADMIN_IDLE_MINUTES } from "@/lib/security";
 import type { Order, Product } from "@/lib/types";
 import { ChangePassword, Login } from "./auth-forms";
 
+type Withdrawal = { id: number; order_id: number; name: string; email: string; reason: string | null; status: string; created_at: string };
+
 const STATUSES: Order["status"][] = ["pendiente", "pagado", "enviado", "cancelado"];
 
 export default function AdminPage() {
@@ -105,17 +107,20 @@ function Shell({ children }: { children: React.ReactNode }) {
 
 function Dashboard({ email }: { email: string }) {
   const sb = getSupabase()!;
-  const [tab, setTab] = useState<"orders" | "products" | "access">("orders");
+  const [tab, setTab] = useState<"orders" | "products" | "withdrawals" | "access">("orders");
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
 
   const load = useCallback(async () => {
-    const [o, p] = await Promise.all([
+    const [o, p, w] = await Promise.all([
       sb.from("orders").select("*, order_items(*)").order("created_at", { ascending: false }),
       sb.from("products").select("*").order("id"),
+      sb.from("withdrawals").select("*").order("created_at", { ascending: false }),
     ]);
     setOrders(o.data ?? []);
     setProducts(p.data ?? []);
+    setWithdrawals(w.data ?? []);
   }, [sb]);
 
   useEffect(() => {
@@ -150,15 +155,33 @@ function Dashboard({ email }: { email: string }) {
       </div>
 
       <div className="mb-4 flex gap-2 text-xs font-bold uppercase">
-        {(["orders", "products", "access"] as const).map((t) => (
+        {(["orders", "products", "withdrawals", "access"] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)} className={`border px-4 py-2 ${tab === t ? "bg-black text-white" : "border-neutral-300"}`}>
-            {{ orders: "Pedidos", products: "Productos", access: "Acceso" }[t]}
+            {{ orders: "Pedidos", products: "Productos", withdrawals: `Arrepentimientos (${withdrawals.filter((w) => w.status === "pendiente").length})`, access: "Acceso" }[t]}
           </button>
         ))}
       </div>
 
       {tab === "access" ? (
         <ChangePassword email={email} />
+      ) : tab === "withdrawals" ? (
+        <ul className="space-y-2 text-sm">
+          {withdrawals.length === 0 && <li className="text-neutral-500">No hay solicitudes.</li>}
+          {withdrawals.map((w) => (
+            <li key={w.id} className="flex flex-wrap items-center gap-3 border border-neutral-200 p-3">
+              <b>ARR-{String(w.id).padStart(6, "0")}</b>
+              <span>Pedido #{w.order_id}</span>
+              <span>{w.name} · {w.email}</span>
+              {w.reason && <span className="text-neutral-500">“{w.reason}”</span>}
+              <span className="ml-auto text-xs uppercase">{w.status}</span>
+              {w.status === "pendiente" && (
+                <button onClick={async () => { await sb.from("withdrawals").update({ status: "resuelto" }).eq("id", w.id); load(); }} className="bg-black px-3 py-1 text-xs font-bold text-white uppercase">
+                  Marcar resuelto
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
       ) : tab === "orders" ? (
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">

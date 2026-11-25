@@ -275,6 +275,49 @@ create trigger orders_restock before update on public.orders
 revoke insert, update, delete on public.orders, public.order_items from anon, authenticated;
 grant update (status) on public.orders to authenticated;
 
+-- ---------- Botón de arrepentimiento (Res. 424/2020) ----------
+create table if not exists public.withdrawals (
+  id          bigint generated always as identity primary key,
+  order_id    bigint not null references public.orders(id) on delete cascade,
+  name        text not null check (char_length(name) between 2 and 80),
+  email       text not null check (char_length(email) <= 120),
+  reason      text check (reason is null or char_length(reason) <= 500),
+  status      text not null default 'pendiente' check (status in ('pendiente','resuelto')),
+  created_at  timestamptz not null default now()
+);
+alter table public.withdrawals enable row level security;
+drop policy if exists "admin withdrawals" on public.withdrawals;
+create policy "admin withdrawals" on public.withdrawals
+  for all to authenticated using (public.is_admin()) with check (public.is_admin());
+
+-- Solo se registra si el pedido existe, es del mismo email y tiene menos de 10 días + envío (30 días)
+create or replace function public.request_withdrawal(
+  p_name text, p_email text, p_order_id bigint, p_reason text
+) returns bigint
+language plpgsql security definer set search_path = public as $$
+declare v_id bigint;
+begin
+  p_name  := trim(p_name);
+  p_email := lower(trim(p_email));
+  p_reason := nullif(trim(p_reason), '');
+  if p_name is null or char_length(p_name) not between 2 and 80 then raise exception 'Nombre inválido'; end if;
+  if p_reason is not null and char_length(p_reason) > 500 then raise exception 'Comentario demasiado largo'; end if;
+  -- Mensaje genérico: no revela si el pedido existe para otro email
+  if not exists (select 1 from orders where id = p_order_id and customer_email = p_email
+                  and status <> 'cancelado' and created_at > now() - interval '30 days') then
+    raise exception 'No encontramos un pedido vigente con ese número y email';
+  end if;
+  if (select count(*) from withdrawals where order_id = p_order_id) >= 3 then
+    raise exception 'Ya recibimos tu solicitud para este pedido';
+  end if;
+  insert into withdrawals (order_id, name, email, reason)
+  values (p_order_id, p_name, p_email, p_reason) returning id into v_id;
+  return v_id;
+end;
+$$;
+revoke all on function public.request_withdrawal(text,text,bigint,text) from public;
+grant execute on function public.request_withdrawal(text,text,bigint,text) to anon, authenticated;
+
 -- ---------- Dar permisos de admin ----------
 -- 1) Creá tu usuario en Supabase > Authentication > Users > Add user
 -- 2) Ejecutá (cambiando el email):

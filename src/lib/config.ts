@@ -7,6 +7,11 @@ export const STORE = {
   instagram: "https://instagram.com",
 };
 
+/** URL pública del sitio (Vercel la define sola en producción) */
+export const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000");
+
 export const formatPrice = (n: number) =>
   new Intl.NumberFormat("es-AR", {
     style: "currency",

@@ -9,7 +9,7 @@ E-commerce full stack hecho con **Next.js 16 (App Router) + TypeScript + Tailwin
 - Carrito persistente (localStorage)
 - Checkout que crea el pedido mediante una **función SQL (RPC) segura**: recalcula precios en la base, valida talles y stock, aplica descuentos y descuenta stock en una sola transacción
 - **Panel de administración** (`/admin`) con login de Supabase Auth: métricas, pedidos con cambio de estado y edición de precio / stock / visibilidad de productos
-- **20 medidas de seguridad** (variables de entorno, RLS, validaciones en la base, límite de intentos de login, headers CSP, etc.) → ver [SECURITY.md](SECURITY.md)
+- **20 medidas de seguridad** (variables de entorno, RLS, validaciones en la base, límite de intentos de login, headers CSP, etc.) → ver [SECURITY.md](SECURITY.md) y la checklist completa de 40 puntos en [CHECKLIST.md](CHECKLIST.md)
 - Newsletter, botón de WhatsApp, banner de cookies, diseño responsive
 - **Modo demo**: si no hay variables de Supabase la tienda funciona con datos locales
 

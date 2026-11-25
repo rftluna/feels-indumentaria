@@ -9,12 +9,13 @@ import { cartTotals } from "@/lib/cart-math";
 import { formatPrice, STORE } from "@/lib/config";
 import { getSupabase } from "@/lib/supabase";
 import { clean, EMAIL_RE, LIMITS, PHONE_RE } from "@/lib/security";
+import { Honeypot } from "@/components/honeypot";
 
 export default function CartPage() {
   const { items, loaded, setQty, remove, clear } = useCart();
   const router = useRouter();
   const t = cartTotals(items);
-  const [form, setForm] = useState({ name: "", email: "", phone: "", address: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", address: "", website: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -22,6 +23,7 @@ export default function CartPage() {
     e.preventDefault();
     if (loading) return; // evita doble envío
     setError("");
+    if (form.website) return; // honeypot: lo completó un bot, se descarta en silencio
 
     // Validación en el navegador (la base vuelve a validar todo igual)
     const fields = {
@@ -117,7 +119,8 @@ export default function CartPage() {
           <div className="flex justify-between border-t border-neutral-200 pt-2 text-lg font-bold"><dt>Total</dt><dd>{formatPrice(t.total)}</dd></div>
         </dl>
 
-        <form onSubmit={checkout} noValidate className="mt-6 space-y-3">
+        <form onSubmit={checkout} noValidate className="relative mt-6 space-y-3">
+          <Honeypot value={form.website} onChange={(v) => setForm({ ...form, website: v })} />
           <h2 className="text-xs font-bold tracking-wider uppercase">Tus datos</h2>
           {([
             ["name", "Nombre y apellido", "text", true],

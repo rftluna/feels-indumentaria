@@ -9,7 +9,13 @@ export const revalidate = 60;
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const product = await getProductBySlug((await params).slug);
-  return { title: product?.name ?? "Producto" };
+  if (!product) return { title: "Producto no encontrado" };
+  const description = `${product.description ?? product.name} · ${formatPrice(product.price)}`;
+  return {
+    title: product.name,
+    description,
+    openGraph: { title: product.name, description, images: product.image_url ? [product.image_url] : undefined },
+  };
 }
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {

@@ -6,14 +6,26 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { CookieBanner, WhatsAppButton } from "@/components/extras";
 import { getCategories } from "@/lib/data";
-import { STORE } from "@/lib/config";
+import { SITE_URL, STORE } from "@/lib/config";
 
 const sans = Archivo({ variable: "--font-archivo", subsets: ["latin"] });
 const logo = Permanent_Marker({ variable: "--font-marker", weight: "400", subsets: ["latin"] });
 
+const description = "Tienda online de ropa oversize: buzos, remeras, musculosas y shorts. Envío gratis desde $10.000.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: { default: `${STORE.name} | Ropa oversize`, template: `%s | ${STORE.name}` },
-  description: "Tienda online de ropa oversize: buzos, remeras, musculosas y shorts.",
+  description,
+  openGraph: {
+    type: "website",
+    locale: "es_AR",
+    siteName: STORE.name,
+    title: `${STORE.name} | Ropa oversize`,
+    description,
+    images: [{ url: "https://images.unsplash.com/photo-1523398002811-999ca8dec234?w=1200&h=630&fit=crop&q=70", width: 1200, height: 630, alt: STORE.name }],
+  },
+  twitter: { card: "summary_large_image" },
 };
 
 export const revalidate = 60;
