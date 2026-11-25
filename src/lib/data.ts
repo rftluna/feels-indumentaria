@@ -14,6 +14,9 @@ export async function getCategories(): Promise<Category[]> {
 
 export async function getProducts(opts: { categorySlug?: string; q?: string; limit?: number } = {}): Promise<Product[]> {
   const sb = getSupabase();
+  // Saneamos lo que llega por la URL: largo máximo y sin comodines de SQL (% _)
+  if (opts.q) opts = { ...opts, q: opts.q.replace(/[%_\\]/g, "").trim().slice(0, 60) || undefined };
+  if (opts.categorySlug && !/^[a-z0-9-]{1,60}$/.test(opts.categorySlug)) return [];
 
   if (!sb) {
     let list = demoProducts;

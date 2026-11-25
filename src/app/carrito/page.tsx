@@ -8,6 +8,7 @@ import { useCart } from "@/components/cart-provider";
 import { cartTotals } from "@/lib/cart-math";
 import { formatPrice, STORE } from "@/lib/config";
 import { getSupabase } from "@/lib/supabase";
+import { clean, EMAIL_RE, LIMITS, PHONE_RE } from "@/lib/security";
 
 export default function CartPage() {
   const { items, loaded, setQty, remove, clear } = useCart();
@@ -19,8 +20,22 @@ export default function CartPage() {
 
   const checkout = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    if (loading) return; // evita doble envío
     setError("");
+
+    // Validación en el navegador (la base vuelve a validar todo igual)
+    const fields = {
+      name: clean(form.name, LIMITS.name),
+      email: clean(form.email, LIMITS.email).toLowerCase(),
+      phone: clean(form.phone, LIMITS.phone),
+      address: clean(form.address, LIMITS.address),
+    };
+    if (fields.name.length < 2) return setError("Ingresá tu nombre.");
+    if (!EMAIL_RE.test(fields.email)) return setError("Ingresá un email válido.");
+    if (fields.phone && !PHONE_RE.test(fields.phone)) return setError("El teléfono solo puede tener números, espacios, +, - y paréntesis.");
+    if (fields.address.length < 5) return setError("Ingresá una dirección de envío.");
+
+    setLoading(true);
     const sb = getSupabase();
     let orderId: number;
 
@@ -28,14 +43,16 @@ export default function CartPage() {
       orderId = Math.floor(Math.random() * 9000) + 1000; // modo demo
     } else {
       const { data, error } = await sb.rpc("create_order", {
-        p_name: form.name,
-        p_email: form.email,
-        p_phone: form.phone,
-        p_address: form.address,
+        p_name: fields.name,
+        p_email: fields.email,
+        p_phone: fields.phone,
+        p_address: fields.address,
         p_items: items.map((i) => ({ product_id: i.productId, size: i.size, quantity: i.quantity })),
       });
       if (error) {
-        setError(error.message);
+        // Solo mostramos los mensajes propios de create_order (código P0001);
+        // cualquier otro error interno se muestra genérico para no filtrar detalles.
+        setError(error.code === "P0001" ? error.message : "No pudimos procesar el pedido. Probá de nuevo.");
         setLoading(false);
         return;
       }
@@ -100,7 +117,7 @@ export default function CartPage() {
           <div className="flex justify-between border-t border-neutral-200 pt-2 text-lg font-bold"><dt>Total</dt><dd>{formatPrice(t.total)}</dd></div>
         </dl>
 
-        <form onSubmit={checkout} className="mt-6 space-y-3">
+        <form onSubmit={checkout} noValidate className="mt-6 space-y-3">
           <h2 className="text-xs font-bold tracking-wider uppercase">Tus datos</h2>
           {([
             ["name", "Nombre y apellido", "text", true],
@@ -113,6 +130,8 @@ export default function CartPage() {
               type={type}
               required={req}
               placeholder={label}
+              maxLength={LIMITS[k]}
+              autoComplete={{ name: "name", email: "email", phone: "tel", address: "street-address" }[k]}
               value={form[k]}
               onChange={(e) => setForm({ ...form, [k]: e.target.value })}
               className="w-full border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-black"

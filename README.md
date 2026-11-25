@@ -9,7 +9,7 @@ E-commerce full stack hecho con **Next.js 16 (App Router) + TypeScript + Tailwin
 - Carrito persistente (localStorage)
 - Checkout que crea el pedido mediante una **función SQL (RPC) segura**: recalcula precios en la base, valida talles y stock, aplica descuentos y descuenta stock en una sola transacción
 - **Panel de administración** (`/admin`) con login de Supabase Auth: métricas, pedidos con cambio de estado y edición de precio / stock / visibilidad de productos
-- Seguridad con **Row Level Security**: el público solo lee productos; solo los usuarios de la tabla `admins` pueden gestionar datos
+- **20 medidas de seguridad** (variables de entorno, RLS, validaciones en la base, límite de intentos de login, headers CSP, etc.) → ver [SECURITY.md](SECURITY.md)
 - Newsletter, botón de WhatsApp, banner de cookies, diseño responsive
 - **Modo demo**: si no hay variables de Supabase la tienda funciona con datos locales
 
@@ -39,8 +39,8 @@ npm run dev
    insert into public.admins (user_id)
      select id from auth.users where email = 'tu-email@ejemplo.com';
    ```
-5. Recomendado: en **Authentication > Sign In / Providers** desactivá “Allow new users to sign up”.
-6. Copiá **Project URL** y **anon public key** (Project Settings > API) a `.env.local`.
+5. **Importante:** en **Authentication > Sign In / Providers** desactivá “Allow new users to sign up”, y en **Authentication > URL Configuration** poné como *Site URL* la URL de Vercel (para el mail de recuperación de contraseña).
+6. Copiá **Project URL** y la clave **anon / publishable** (Project Settings > API) a `.env.local`. ⚠️ Nunca uses la clave `service_role` / secret.
 
 ## Deploy en Vercel
 

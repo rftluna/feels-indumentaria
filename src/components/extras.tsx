@@ -8,7 +8,7 @@ export function WhatsAppButton() {
     <a
       href={`https://wa.me/${STORE.whatsapp}`}
       target="_blank"
-      rel="noreferrer"
+      rel="noopener noreferrer"
       aria-label="Chateá con nosotros por WhatsApp"
       className="fixed right-5 bottom-5 z-50 grid h-14 w-14 place-items-center rounded-full bg-[#25D366] text-white shadow-lg transition hover:scale-105"
     >

@@ -4,26 +4,52 @@ import { useCallback, useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { getSupabase } from "@/lib/supabase";
 import { formatPrice } from "@/lib/config";
+import { ADMIN_IDLE_MINUTES } from "@/lib/security";
 import type { Order, Product } from "@/lib/types";
+import { ChangePassword, Login } from "./auth-forms";
 
 const STATUSES: Order["status"][] = ["pendiente", "pagado", "enviado", "cancelado"];
 
 export default function AdminPage() {
   const sb = getSupabase();
   const [session, setSession] = useState<Session | null>(null);
+  const [ready, setReady] = useState(false);
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [recovery, setRecovery] = useState(false);
 
   useEffect(() => {
     if (!sb) return;
-    sb.auth.getSession().then(({ data }) => setSession(data.session));
-    const { data } = sb.auth.onAuthStateChange((_e, s) => setSession(s));
+    sb.auth.getSession().then(({ data }) => { setSession(data.session); setReady(true); });
+    const { data } = sb.auth.onAuthStateChange((event, s) => {
+      setSession(s);
+      // Llegó desde el mail de "olvidé mi contraseña"
+      if (event === "PASSWORD_RECOVERY") setRecovery(true);
+    });
     return () => data.subscription.unsubscribe();
   }, [sb]);
 
+  // Verificamos en la base (tabla admins) si el usuario es administrador
   useEffect(() => {
     if (!sb || !session) return;
     sb.from("admins").select("user_id").eq("user_id", session.user.id).maybeSingle()
       .then(({ data }) => setIsAdmin(Boolean(data)));
+  }, [sb, session]);
+
+  // Cierre de sesión automático por inactividad
+  useEffect(() => {
+    if (!sb || !session) return;
+    let timer: ReturnType<typeof setTimeout>;
+    const reset = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => sb.auth.signOut(), ADMIN_IDLE_MINUTES * 60_000);
+    };
+    const events = ["mousemove", "keydown", "click", "scroll", "touchstart"] as const;
+    events.forEach((ev) => window.addEventListener(ev, reset, { passive: true }));
+    reset();
+    return () => {
+      clearTimeout(timer);
+      events.forEach((ev) => window.removeEventListener(ev, reset));
+    };
   }, [sb, session]);
 
   if (!sb)
@@ -36,12 +62,23 @@ export default function AdminPage() {
       </Shell>
     );
 
-  if (!session) return <Shell><Login /></Shell>;
+  if (!ready) return <Shell><p className="text-neutral-500">Cargando...</p></Shell>;
 
-  if (isAdmin === false)
+  if (session && recovery)
     return (
       <Shell>
-        <p>Tu usuario ({session.user.email}) no tiene permisos de administrador.</p>
+        <ChangePassword email={session.user.email ?? ""} recovery onDone={() => setRecovery(false)} />
+      </Shell>
+    );
+
+  if (!session) return <Shell><Login /></Shell>;
+
+  if (isAdmin === null) return <Shell><p className="text-neutral-500">Verificando permisos...</p></Shell>;
+
+  if (!isAdmin)
+    return (
+      <Shell>
+        <p>Esta cuenta no tiene permiso para entrar al panel.</p>
         <button onClick={() => sb.auth.signOut()} className="mt-4 underline">Cerrar sesión</button>
       </Shell>
     );
@@ -52,7 +89,7 @@ export default function AdminPage() {
         <span>Sesión: {session.user.email}</span>
         <button onClick={() => sb.auth.signOut()} className="underline">Cerrar sesión</button>
       </div>
-      {isAdmin && <Dashboard />}
+      <Dashboard email={session.user.email ?? ""} />
     </Shell>
   );
 }
@@ -66,30 +103,9 @@ function Shell({ children }: { children: React.ReactNode }) {
   );
 }
 
-function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const { error } = await getSupabase()!.auth.signInWithPassword({ email, password });
-    if (error) setError("Email o contraseña incorrectos");
-  };
-
-  return (
-    <form onSubmit={submit} className="max-w-sm space-y-3">
-      <input type="email" required placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full border border-neutral-300 px-3 py-2" />
-      <input type="password" required placeholder="Contraseña" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full border border-neutral-300 px-3 py-2" />
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      <button className="w-full bg-black py-3 text-sm font-bold text-white uppercase">Ingresar</button>
-    </form>
-  );
-}
-
-function Dashboard() {
+function Dashboard({ email }: { email: string }) {
   const sb = getSupabase()!;
-  const [tab, setTab] = useState<"orders" | "products">("orders");
+  const [tab, setTab] = useState<"orders" | "products" | "access">("orders");
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
 
@@ -108,11 +124,16 @@ function Dashboard() {
   }, [load]);
 
   const setStatus = async (id: number, status: string) => {
+    if (status === "cancelado" && !window.confirm(`¿Cancelar el pedido #${id}?`)) return;
     await sb.from("orders").update({ status }).eq("id", id);
     load();
   };
 
   const saveProduct = async (p: Product) => {
+    if (!Number.isFinite(p.price) || p.price < 0 || !Number.isInteger(p.stock) || p.stock < 0) {
+      alert("Precio y stock tienen que ser números positivos.");
+      return;
+    }
     await sb.from("products").update({ price: p.price, stock: p.stock, active: p.active }).eq("id", p.id);
     load();
   };
@@ -128,14 +149,16 @@ function Dashboard() {
       </div>
 
       <div className="mb-4 flex gap-2 text-xs font-bold uppercase">
-        {(["orders", "products"] as const).map((t) => (
+        {(["orders", "products", "access"] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)} className={`border px-4 py-2 ${tab === t ? "bg-black text-white" : "border-neutral-300"}`}>
-            {t === "orders" ? "Pedidos" : "Productos"}
+            {{ orders: "Pedidos", products: "Productos", access: "Acceso" }[t]}
           </button>
         ))}
       </div>
 
-      {tab === "orders" ? (
+      {tab === "access" ? (
+        <ChangePassword email={email} />
+      ) : tab === "orders" ? (
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="border-b text-xs uppercase"><tr><th className="py-2">#</th><th>Cliente</th><th>Items</th><th>Total</th><th>Estado</th></tr></thead>

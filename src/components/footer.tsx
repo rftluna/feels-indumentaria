@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { STORE } from "@/lib/config";
 import { getSupabase } from "@/lib/supabase";
+import { clean, EMAIL_RE, LIMITS } from "@/lib/security";
 
 export function Footer() {
   const [email, setEmail] = useState("");
@@ -11,11 +12,15 @@ export function Footer() {
 
   const subscribe = async (e: React.FormEvent) => {
     e.preventDefault();
+    const value = clean(email, LIMITS.email).toLowerCase();
+    if (!EMAIL_RE.test(value)) return setMsg("Ingresá un email válido.");
     const sb = getSupabase();
     if (!sb) return setMsg("¡Gracias! (modo demo)");
-    const { error } = await sb.from("newsletter").insert({ email });
-    setMsg(error ? (error.code === "23505" ? "Ya estabas suscripto 🙌" : "No pudimos suscribirte") : "¡Gracias por suscribirte!");
-    if (!error) setEmail("");
+    const { error } = await sb.from("newsletter").insert({ email: value });
+    // Si el email ya existía (23505) mostramos lo mismo: no revelamos quién está suscripto.
+    const ok = !error || error.code === "23505";
+    setMsg(ok ? "¡Gracias por suscribirte!" : "No pudimos suscribirte. Probá más tarde.");
+    if (ok) setEmail("");
   };
 
   return (
@@ -36,7 +41,7 @@ export function Footer() {
         </div>
         <div>
           <h4 className="mb-3 font-bold tracking-wider uppercase">Redes sociales</h4>
-          <a href={STORE.instagram} target="_blank" rel="noreferrer" className="text-neutral-600 hover:underline">Instagram</a>
+          <a href={STORE.instagram} target="_blank" rel="noopener noreferrer" className="text-neutral-600 hover:underline">Instagram</a>
         </div>
         <div>
           <h4 className="mb-3 font-bold tracking-wider uppercase">Newsletter</h4>
@@ -47,6 +52,7 @@ export function Footer() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Tu email"
+              maxLength={LIMITS.email}
               className="min-w-0 flex-1 border border-neutral-300 bg-white px-3 py-2 outline-none"
             />
             <button className="bg-black px-4 text-xs font-bold text-white uppercase">Enviar</button>

@@ -14,8 +14,8 @@ create table if not exists public.categories (
 create table if not exists public.products (
   id              bigint generated always as identity primary key,
   slug            text unique not null,
-  name            text not null,
-  description     text,
+  name            text not null check (char_length(name) between 2 and 100),
+  description     text check (description is null or char_length(description) <= 2000),
   price           numeric(12,2) not null check (price >= 0),
   image_url       text,
   category_id     bigint references public.categories(id) on delete set null,
@@ -24,16 +24,20 @@ create table if not exists public.products (
   promo_min_qty   int,           -- ej: 2  ("comprando 2 o más")
   promo_percent   int,           -- ej: 10
   stock           int not null default 0 check (stock >= 0),
+  -- (las promos tienen que ser coherentes: 1..90 % y mínimo 1 unidad)
+  check (promo_percent is null or promo_percent between 1 and 90),
+  check (promo_min_qty is null or promo_min_qty >= 1),
   active          boolean not null default true,
   created_at      timestamptz not null default now()
 );
 
 create table if not exists public.orders (
   id              bigint generated always as identity primary key,
-  customer_name   text not null,
-  customer_email  text not null,
-  customer_phone  text,
-  address         text,
+  customer_name   text not null check (char_length(customer_name) between 2 and 80),
+  customer_email  text not null check (char_length(customer_email) <= 120
+                                       and customer_email ~ '^[^@\s]+@[^@\s]+\.[^@\s]+$'),
+  customer_phone  text check (customer_phone is null or customer_phone ~ '^[0-9 +()-]{6,25}$'),
+  address         text check (address is null or char_length(address) <= 200),
   subtotal        numeric(12,2) not null,
   discount        numeric(12,2) not null default 0,
   shipping        numeric(12,2) not null default 0,
@@ -55,7 +59,8 @@ create table if not exists public.order_items (
 
 create table if not exists public.newsletter (
   id          bigint generated always as identity primary key,
-  email       text unique not null,
+  email       text unique not null check (char_length(email) <= 120
+                                          and email ~ '^[^@\s]+@[^@\s]+\.[^@\s]+$'),
   created_at  timestamptz not null default now()
 );
 
@@ -138,11 +143,35 @@ declare
   v_line      numeric;
   v_prod_qty  int;
 begin
-  if p_items is null or jsonb_array_length(p_items) = 0 then
+  -- Validaciones (no confiamos en nada de lo que manda el navegador)
+  p_name    := trim(p_name);
+  p_email   := lower(trim(p_email));
+  p_phone   := nullif(trim(p_phone), '');
+  p_address := nullif(trim(p_address), '');
+
+  if p_items is null or jsonb_typeof(p_items) <> 'array' or jsonb_array_length(p_items) = 0 then
     raise exception 'El carrito está vacío';
   end if;
-  if coalesce(trim(p_name),'') = '' or p_email !~ '^[^@\s]+@[^@\s]+\.[^@\s]+$' then
-    raise exception 'Nombre o email inválido';
+  if jsonb_array_length(p_items) > 20 then
+    raise exception 'Demasiados productos en un solo pedido';
+  end if;
+  if p_name is null or char_length(p_name) not between 2 and 80 then
+    raise exception 'Nombre inválido';
+  end if;
+  if p_email is null or char_length(p_email) > 120 or p_email !~ '^[^@\s]+@[^@\s]+\.[^@\s]+$' then
+    raise exception 'Email inválido';
+  end if;
+  if p_phone is not null and p_phone !~ '^[0-9 +()-]{6,25}$' then
+    raise exception 'Teléfono inválido';
+  end if;
+  if p_address is null or char_length(p_address) > 200 then
+    raise exception 'Dirección inválida';
+  end if;
+
+  -- Límite anti-spam: máximo 5 pedidos por email por hora
+  if (select count(*) from orders
+       where customer_email = p_email and created_at > now() - interval '1 hour') >= 5 then
+    raise exception 'Demasiados pedidos seguidos. Probá de nuevo más tarde.';
   end if;
 
   insert into orders (customer_name, customer_email, customer_phone, address, subtotal, total)
@@ -201,7 +230,22 @@ begin
 end;
 $$;
 
+revoke all on function public.create_order(text,text,text,text,jsonb) from public;
 grant execute on function public.create_order(text,text,text,text,jsonb) to anon, authenticated;
+revoke all on function public.is_admin() from public;
+grant execute on function public.is_admin() to anon, authenticated;
+
+-- Newsletter: guardar emails siempre en minúscula y sin espacios
+create or replace function public.normalize_newsletter_email() returns trigger
+language plpgsql set search_path = public as $$
+begin
+  new.email := lower(trim(new.email));
+  return new;
+end;
+$$;
+drop trigger if exists newsletter_normalize on public.newsletter;
+create trigger newsletter_normalize before insert on public.newsletter
+  for each row execute function public.normalize_newsletter_email();
 
 -- ---------- Dar permisos de admin ----------
 -- 1) Creá tu usuario en Supabase > Authentication > Users > Add user
