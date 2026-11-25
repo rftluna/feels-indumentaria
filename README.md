@@ -1,4 +1,4 @@
-# SLOW DAYS — Tienda online de ropa oversize
+# Fields Indumentaria — Tienda online de ropa oversize
 
 E-commerce full stack hecho con **Next.js 16 (App Router) + TypeScript + Tailwind CSS**, base de datos y autenticación en **Supabase** y deploy en **Vercel**. 100 % con planes gratuitos.
 

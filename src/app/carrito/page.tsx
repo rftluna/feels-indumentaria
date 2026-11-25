@@ -144,7 +144,7 @@ export default function CartPage() {
           <button disabled={loading} className="w-full bg-black py-3 text-sm font-bold tracking-widest text-white uppercase disabled:bg-neutral-400">
             {loading ? "Procesando..." : "Finalizar compra"}
           </button>
-          <p className="text-center text-[11px] text-neutral-500">Proyecto demo: no se realiza ningún cobro real.</p>
+          <p className="text-center text-[11px] text-neutral-500">No se cobra nada ahora: te contactamos para coordinar el pago y el envío.</p>
         </form>
       </aside>
     </div>

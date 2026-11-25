@@ -72,7 +72,7 @@ export function Footer() {
         <Link href="/arrepentimiento" className="underline">Botón de arrepentimiento</Link>
       </div>
       <p className="border-t border-neutral-200 py-4 text-center text-[11px] tracking-wider text-neutral-500 uppercase">
-        Copyright {STORE.name} - {new Date().getFullYear()}. Proyecto de portfolio · Next.js + Supabase + Vercel
+        Copyright {STORE.name} - {new Date().getFullYear()}. Todos los derechos reservados.
       </p>
     </footer>
   );

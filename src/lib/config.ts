@@ -1,5 +1,6 @@
 export const STORE = {
-  name: "SLOW DAYS",
+  name: "Fields Indumentaria",
+  shortName: "Fields",
   freeShippingFrom: 10000,
   shippingCost: 1500,
   // Número de WhatsApp en formato internacional sin "+" (cambialo por el tuyo)

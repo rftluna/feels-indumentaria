@@ -1,5 +1,5 @@
 -- =========================================================
--- SLOW DAYS STORE — esquema para Supabase (plan Free)
+-- FIELDS INDUMENTARIA — esquema para Supabase (plan Free)
 -- Pegá todo este archivo en Supabase > SQL Editor > Run
 -- =========================================================
 

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useCart } from "./cart-provider";
-import { STORE } from "@/lib/config";
+import { Logo } from "./logo";
 import type { Category } from "@/lib/types";
 
 export function Header({ categories }: { categories: Category[] }) {
@@ -43,9 +43,7 @@ export function Header({ categories }: { categories: Category[] }) {
           </form>
         </div>
 
-        <Link href="/" className="font-logo text-3xl tracking-tight md:text-5xl">
-          {STORE.name}
-        </Link>
+        <Logo />
 
         <div className="flex items-center justify-end gap-4 text-xs font-semibold uppercase">
           <Link href="/admin" className="hidden hover:underline md:inline">Admin</Link>

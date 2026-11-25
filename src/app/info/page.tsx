@@ -16,7 +16,7 @@ const sections: [string, string, string[]][] = [
     "Además, por ser una compra a distancia, tenés 10 días corridos para arrepentirte de la compra sin dar motivos (Ley 24.240, art. 34). Podés hacerlo con el Botón de arrepentimiento.",
   ]],
   ["terminos", "Términos y condiciones", [
-    `Este sitio es un proyecto de portfolio. ${STORE.name} es una marca ficticia: los productos, precios y pedidos son de demostración y no se realizan cobros reales.`,
+    `${STORE.name} vende indumentaria oversize por internet. Por ahora el sitio no procesa pagos: después de hacer tu pedido te contactamos para coordinar el pago y el envío.`,
     "Los precios están expresados en pesos argentinos e incluyen IVA. Las promociones aplican por producto y no son acumulables con otras ofertas.",
     "Nos reservamos el derecho de cancelar pedidos con datos falsos o sin stock disponible, devolviendo el stock reservado.",
   ]],
@@ -41,7 +41,7 @@ export default function Info() {
       <Link href="/arrepentimiento" className="inline-block border border-black px-6 py-3 text-xs font-bold tracking-widest uppercase hover:bg-black hover:text-white">
         Botón de arrepentimiento
       </Link>
-      <p className="text-xs text-neutral-500">Textos de ejemplo para un proyecto de portfolio: en un comercio real conviene que los revise un abogado.</p>
+      <p className="text-xs text-neutral-500">Textos de referencia: antes de operar comercialmente conviene que los revise un abogado.</p>
     </div>
   );
 }
