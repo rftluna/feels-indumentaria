@@ -9,7 +9,7 @@
 4. **Row Level Security** activado en todas las tablas.
 5. **Denegado por defecto:** lo que no tiene una política explícita queda bloqueado. El público solo puede leer productos/categorías y suscribirse al newsletter.
 6. **Admin verificado por ID de usuario** (tabla `admins` + función `is_admin()`), no por email. Sigue valiendo aunque se cambie el email o la contraseña.
-7. **Checkout seguro por RPC** (`create_order`, `security definer`): precios, descuentos, envío y stock se calculan en la base. El navegador no puede cambiar el precio.
+7. **Checkout seguro por RPC** (`create_order`, `security definer`): precios, descuentos, envío y stock se calculan en la base. El navegador no puede cambiar el precio. Al **cancelar** un pedido el stock se devuelve en la misma transacción (o se hace todo o nada), y desde la app solo se puede modificar la columna `status`.
 8. **Validación en la base** con `CHECK`: largos máximos, formato de email y teléfono, promos coherentes, stock y precios no negativos.
 9. **Anti-spam:** como máximo 5 pedidos por email por hora, 20 productos distintos por pedido y 20 unidades por producto.
 

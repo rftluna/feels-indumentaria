@@ -124,8 +124,9 @@ function Dashboard({ email }: { email: string }) {
   }, [load]);
 
   const setStatus = async (id: number, status: string) => {
-    if (status === "cancelado" && !window.confirm(`¿Cancelar el pedido #${id}?`)) return;
-    await sb.from("orders").update({ status }).eq("id", id);
+    if (status === "cancelado" && !window.confirm(`¿Cancelar el pedido #${id}? Se devuelve el stock y no se puede reactivar.`)) return;
+    const { error } = await sb.from("orders").update({ status }).eq("id", id);
+    if (error) alert(error.code === "P0001" ? error.message : "No se pudo actualizar el pedido.");
     load();
   };
 
@@ -170,7 +171,7 @@ function Dashboard({ email }: { email: string }) {
                   <td className="text-xs">{o.order_items?.map((i) => <div key={i.id}>{i.quantity}× {i.name} ({i.size})</div>)}</td>
                   <td>{formatPrice(Number(o.total))}</td>
                   <td>
-                    <select value={o.status} onChange={(e) => setStatus(o.id, e.target.value)} className="border border-neutral-300 px-2 py-1">
+                    <select value={o.status} disabled={o.status === "cancelado"} onChange={(e) => setStatus(o.id, e.target.value)} className="border border-neutral-300 px-2 py-1 disabled:bg-neutral-100">
                       {STATUSES.map((s) => <option key={s}>{s}</option>)}
                     </select>
                   </td>

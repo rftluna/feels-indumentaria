@@ -247,6 +247,34 @@ drop trigger if exists newsletter_normalize on public.newsletter;
 create trigger newsletter_normalize before insert on public.newsletter
   for each row execute function public.normalize_newsletter_email();
 
+-- ---------- Cancelación atómica ----------
+-- Al pasar un pedido a "cancelado" se devuelve el stock en la misma transacción
+-- (o se hace todo o no se hace nada). Un pedido cancelado no se puede reactivar.
+create or replace function public.restock_on_cancel() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if old.status = 'cancelado' and new.status <> 'cancelado' then
+    raise exception 'Un pedido cancelado no se puede reactivar';
+  end if;
+  if new.status = 'cancelado' and old.status <> 'cancelado' then
+    update products p
+       set stock = p.stock + oi.qty
+      from (select product_id, sum(quantity) qty
+              from order_items where order_id = new.id and product_id is not null
+             group by product_id) oi
+     where p.id = oi.product_id;
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists orders_restock on public.orders;
+create trigger orders_restock before update on public.orders
+  for each row execute function public.restock_on_cancel();
+
+-- Desde la app solo se puede cambiar el ESTADO de un pedido (montos y datos quedan fijos)
+revoke insert, update, delete on public.orders, public.order_items from anon, authenticated;
+grant update (status) on public.orders to authenticated;
+
 -- ---------- Dar permisos de admin ----------
 -- 1) Creá tu usuario en Supabase > Authentication > Users > Add user
 -- 2) Ejecutá (cambiando el email):
