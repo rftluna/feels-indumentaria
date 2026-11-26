@@ -2,22 +2,39 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCart } from "./cart-provider";
 import { Logo } from "./logo";
 import type { Category } from "@/lib/types";
 import { STORE, shortPrice } from "@/lib/config";
+import { getSupabase } from "@/lib/supabase";
 
 export function Header({ categories }: { categories: Category[] }) {
   const { count } = useCart();
   const router = useRouter();
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
+  const [logueado, setLogueado] = useState(false);
+
+  // Si hay una sesión iniciada (administración), mostramos "Cerrar sesión" en el encabezado
+  useEffect(() => {
+    const sb = getSupabase();
+    if (!sb) return;
+    sb.auth.getSession().then(({ data }) => setLogueado(Boolean(data.session)));
+    const { data } = sb.auth.onAuthStateChange((_event, s) => setLogueado(Boolean(s)));
+    return () => data.subscription.unsubscribe();
+  }, []);
 
   const search = (e: React.FormEvent) => {
     e.preventDefault();
     router.push(`/productos${q ? `?q=${encodeURIComponent(q)}` : ""}`);
     setOpen(false);
+  };
+
+  const cerrarSesion = async () => {
+    setOpen(false);
+    await getSupabase()?.auth.signOut();
+    router.refresh();
   };
 
   return (
@@ -48,6 +65,11 @@ export function Header({ categories }: { categories: Category[] }) {
 
         <div className="flex items-center justify-end gap-4 text-xs font-semibold uppercase">
           <Link href="/admin" className="hidden hover:underline md:inline">Admin</Link>
+          {logueado && (
+            <button onClick={cerrarSesion} className="hidden cursor-pointer uppercase hover:underline md:inline">
+              Cerrar sesión
+            </button>
+          )}
           <Link href="/carrito" className="relative flex items-center gap-1" aria-label="Carrito">
             <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3h2l2.4 12h11.2L21 7H6.2" /><circle cx="9" cy="20" r="1.5" /><circle cx="18" cy="20" r="1.5" /></svg>
             <span className="grid h-5 min-w-5 place-items-center rounded-full bg-black px-1 text-[10px] text-white">{count}</span>
@@ -86,6 +108,19 @@ export function Header({ categories }: { categories: Category[] }) {
               Preguntas frecuentes
             </Link>
           </li>
+          {/* En celular, Admin y Cerrar sesión van dentro del menú */}
+          <li className="md:hidden">
+            <Link href="/admin" onClick={() => setOpen(false)} className="hover:underline">
+              Admin
+            </Link>
+          </li>
+          {logueado && (
+            <li className="md:hidden">
+              <button onClick={cerrarSesion} className="cursor-pointer uppercase hover:underline">
+                Cerrar sesión
+              </button>
+            </li>
+          )}
         </ul>
       </nav>
     </header>
