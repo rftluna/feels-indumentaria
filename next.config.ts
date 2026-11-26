@@ -11,6 +11,7 @@ const csp = `
   style-src 'self' 'unsafe-inline';
   img-src 'self' blob: data: https://images.unsplash.com ${supabaseUrl};
   font-src 'self';
+  frame-src https://www.google.com;
   connect-src 'self' ${supabaseUrl} ${supabaseWs};
   object-src 'none';
   base-uri 'self';

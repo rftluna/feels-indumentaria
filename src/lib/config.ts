@@ -5,7 +5,9 @@ export const STORE = {
   shippingCost: 1500,
   // Número de WhatsApp en formato internacional sin "+" (cambialo por el tuyo)
   whatsapp: process.env.NEXT_PUBLIC_WHATSAPP ?? "5491100000000",
-  instagram: "https://instagram.com",
+  instagram: "https://www.instagram.com/textilfeels",
+  // Dirección que se muestra en el mapa de "Dónde estamos" (cambiala por la real)
+  address: process.env.NEXT_PUBLIC_STORE_ADDRESS ?? "Buenos Aires, Argentina",
 };
 
 /** URL pública del sitio (Vercel la define sola en producción) */

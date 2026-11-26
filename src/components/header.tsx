@@ -70,6 +70,11 @@ export function Header({ categories }: { categories: Category[] }) {
               </Link>
             </li>
           ))}
+          <li>
+            <Link href="/info#faq" onClick={() => setOpen(false)} className="hover:underline">
+              Preguntas frecuentes
+            </Link>
+          </li>
         </ul>
       </nav>
     </header>
