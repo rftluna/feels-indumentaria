@@ -38,6 +38,13 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "*.supabase.co" },
     ],
   },
+  // El panel vive en /admin: los links viejos o mal escritos van ahí en vez de dar 404
+  async redirects() {
+    return [
+      { source: "/admin/login", destination: "/admin", permanent: false },
+      { source: "/login", destination: "/admin", permanent: false },
+    ];
+  },
   async headers() {
     return [
       { source: "/(.*)", headers: securityHeaders },
