@@ -7,6 +7,7 @@ import { formatPrice } from "@/lib/config";
 import { ADMIN_IDLE_MINUTES } from "@/lib/security";
 import type { Order, Product } from "@/lib/types";
 import { ChangePassword, Login } from "./auth-forms";
+import { FotosAdmin } from "./fotos-admin";
 
 type Withdrawal = { id: number; order_id: number; name: string; email: string; reason: string | null; status: string; created_at: string };
 
@@ -107,7 +108,7 @@ function Shell({ children }: { children: React.ReactNode }) {
 
 function Dashboard({ email }: { email: string }) {
   const sb = getSupabase()!;
-  const [tab, setTab] = useState<"orders" | "products" | "withdrawals" | "access">("orders");
+  const [tab, setTab] = useState<"orders" | "products" | "photos" | "withdrawals" | "access">("orders");
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
@@ -155,15 +156,17 @@ function Dashboard({ email }: { email: string }) {
       </div>
 
       <div className="mb-4 flex gap-2 text-xs font-bold uppercase">
-        {(["orders", "products", "withdrawals", "access"] as const).map((t) => (
+        {(["orders", "products", "photos", "withdrawals", "access"] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)} className={`border px-4 py-2 ${tab === t ? "bg-black text-white" : "border-neutral-300"}`}>
-            {{ orders: "Pedidos", products: "Productos", withdrawals: `Arrepentimientos (${withdrawals.filter((w) => w.status === "pendiente").length})`, access: "Acceso" }[t]}
+            {{ orders: "Pedidos", products: "Productos", photos: "Fotos", withdrawals: `Arrepentimientos (${withdrawals.filter((w) => w.status === "pendiente").length})`, access: "Acceso" }[t]}
           </button>
         ))}
       </div>
 
       {tab === "access" ? (
         <ChangePassword email={email} />
+      ) : tab === "photos" ? (
+        <FotosAdmin sb={sb} products={products} onChange={load} />
       ) : tab === "withdrawals" ? (
         <ul className="space-y-2 text-sm">
           {withdrawals.length === 0 && <li className="text-neutral-500">No hay solicitudes.</li>}

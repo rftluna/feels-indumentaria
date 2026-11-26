@@ -1,18 +1,18 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getProducts } from "@/lib/data";
+import { getPortadaUrl, getProducts } from "@/lib/data";
 import { ProductCard } from "@/components/product-card";
 
 export const revalidate = 60;
 
 export default async function Home() {
-  const products = await getProducts({ limit: 8 });
+  const [products, portada] = await Promise.all([getProducts({ limit: 8 }), getPortadaUrl()]);
 
   return (
     <>
       <section className="relative mx-auto h-[60vh] max-w-7xl overflow-hidden md:h-[75vh]">
         <Image
-          src="https://images.unsplash.com/photo-1523398002811-999ca8dec234?w=1600&q=70"
+          src={portada}
           alt="Colección oversize"
           fill
           priority
