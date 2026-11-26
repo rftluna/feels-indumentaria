@@ -1,5 +1,5 @@
 -- =========================================================
--- FIELDS INDUMENTARIA — esquema para Supabase (plan Free)
+-- FEELS INDUMENTARIA — esquema para Supabase (plan Free)
 -- Pegá todo este archivo en Supabase > SQL Editor > Run
 -- =========================================================
 

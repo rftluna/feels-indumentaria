@@ -1,17 +1,17 @@
 # Checklist maestra — seguridad y calidad web (40 puntos)
 
 Lista reutilizable para cualquier app, software o página web. Junta:
-- **A.** las 20 medidas de seguridad que aplicamos en Fields Indumentaria (ver [SECURITY.md](SECURITY.md)),
+- **A.** las 20 medidas de seguridad que aplicamos en Feels Indumentaria (ver [SECURITY.md](SECURITY.md)),
 - **B.** los 20 puntos del influencer que analizamos para Perfectanias,
 - **C.** los extras legales de Argentina.
 
 Cuando un punto de B ya estaba en A, se indica con **= A#**, así no se cuenta dos veces.
 
-Estado en Fields Indumentaria: ✅ hecho · 🟡 parcial / se verifica después del deploy · ➖ opcional, no aplicado
+Estado en Feels Indumentaria: ✅ hecho · 🟡 parcial / se verifica después del deploy · ➖ opcional, no aplicado
 
 ## A. Seguridad (20)
 
-| # | Punto | Fields Indumentaria |
+| # | Punto | Feels Indumentaria |
 |---|---|---|
 | A1 | Credenciales en variables de entorno, nunca en el código | ✅ |
 | A2 | `.env*` en `.gitignore` + `.env.example` con valores falsos | ✅ |
@@ -36,7 +36,7 @@ Estado en Fields Indumentaria: ✅ hecho · 🟡 parcial / se verifica después 
 
 ## B. Lista del influencer (20) → 17 puntos nuevos
 
-| # | Punto | ¿Ya estaba en A? | Fields Indumentaria |
+| # | Punto | ¿Ya estaba en A? | Feels Indumentaria |
 |---|---|---|---|
 | B1 | Política de privacidad | nuevo | ✅ `/info#privacidad` |
 | B2 | Términos y condiciones | nuevo | ✅ `/info#terminos` |
@@ -61,7 +61,7 @@ Estado en Fields Indumentaria: ✅ hecho · 🟡 parcial / se verifica después 
 
 ## C. Legales Argentina (3)
 
-| # | Punto | Fields Indumentaria |
+| # | Punto | Feels Indumentaria |
 |---|---|---|
 | C1 | Botón de arrepentimiento (Res. 424/2020): link desde el inicio, devuelve un código | ✅ `/arrepentimiento` + pestaña en el admin |
 | C2 | Link de Defensa de las y los Consumidores | ✅ en el pie de página |
@@ -70,4 +70,4 @@ Estado en Fields Indumentaria: ✅ hecho · 🟡 parcial / se verifica después 
 ## Totales
 
 - A (20) + B nuevos (17, porque B3 y B17 repiten A y B4 está incluido en A19) + C (3) = **40 puntos**.
-- En Fields Indumentaria: **37 hechos**, 2 se verifican después del deploy (B12, B16) y 1 es opcional (B19).
+- En Feels Indumentaria: **37 hechos**, 2 se verifican después del deploy (B12, B16) y 1 es opcional (B19).

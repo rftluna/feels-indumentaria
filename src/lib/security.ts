@@ -17,7 +17,7 @@ export const isStrongPassword = (p = "") => PASSWORD_RULES.every((r) => r.ok(p))
 // Se suma a los límites del lado del servidor que ya aplica Supabase Auth.
 export const MAX_ATTEMPTS = 5;
 export const LOCK_MINUTES = 15;
-const KEY = "fields-login-attempts";
+const KEY = "feels-login-attempts";
 
 type AttemptState = { failed: number; lockedUntil: number };
 
