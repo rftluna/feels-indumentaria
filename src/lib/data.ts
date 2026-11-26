@@ -1,5 +1,6 @@
 import { getSupabase } from "./supabase";
 import { demoCategories, demoProducts } from "./demo-data";
+import { PORTADA_DEFAULT } from "./imagenes";
 import type { Category, Product } from "./types";
 
 const toProduct = (p: Product): Product => ({ ...p, price: Number(p.price) });
@@ -42,6 +43,15 @@ export async function getProducts(opts: { categorySlug?: string; q?: string; lim
   const { data, error } = await query;
   if (error) throw new Error(error.message);
   return (data ?? []).map(toProduct);
+}
+
+/** URL de la portada: la subida desde el panel (tabla site_images) o la foto original. */
+export async function getPortadaUrl(): Promise<string> {
+  const sb = getSupabase();
+  if (!sb) return PORTADA_DEFAULT;
+  // Si la tabla todavía no existe (falta correr supabase/fotos.sql) se usa la original.
+  const { data } = await sb.from("site_images").select("url").eq("key", "portada").maybeSingle();
+  return data?.url ?? PORTADA_DEFAULT;
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
