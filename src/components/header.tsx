@@ -72,7 +72,17 @@ export function Header({ categories }: { categories: Category[] }) {
             </li>
           ))}
           <li>
-            <Link href="/info#faq" onClick={() => setOpen(false)} className="hover:underline">
+            <Link href="/como-comprar" onClick={() => setOpen(false)} className="hover:underline">
+              Cómo comprar
+            </Link>
+          </li>
+          <li>
+            <Link href="/contacto" onClick={() => setOpen(false)} className="hover:underline">
+              Contacto
+            </Link>
+          </li>
+          <li>
+            <Link href="/preguntas-frecuentes" onClick={() => setOpen(false)} className="hover:underline">
               Preguntas frecuentes
             </Link>
           </li>
