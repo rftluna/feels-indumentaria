@@ -1,4 +1,3 @@
-import { STORE } from "./config";
 import type { CartItem } from "./types";
 
 /** Mismo cálculo que la función SQL create_order (la base es la fuente de verdad). */
@@ -19,6 +18,7 @@ export function cartTotals(items: CartItem[]) {
   }
 
   const afterDiscount = subtotal - discount;
-  const shipping = items.length === 0 || afterDiscount >= STORE.freeShippingFrom ? 0 : STORE.shippingCost;
+  // El envío lo paga quien compra directo al transporte (Vía Cargo u otro): la tienda no lo suma.
+  const shipping = 0;
   return { subtotal, discount, shipping, total: afterDiscount + shipping };
 }

@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProductBySlug } from "@/lib/data";
-import { formatPrice } from "@/lib/config";
+import { formatPrice, shortPrice, STORE } from "@/lib/config";
 import { AddToCart } from "./add-to-cart";
 
 export const revalidate = 60;
@@ -44,9 +44,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         <AddToCart product={product} />
 
         <ul className="mt-8 space-y-1 text-sm text-neutral-600">
-          <li>🚚 Envío gratis en compras +$10.000</li>
-          <li>💳 Tarjeta, efectivo o transferencia</li>
-          <li>🔁 Cambios dentro de los 30 días</li>
+          <li>🚚 Envíos por {STORE.shippingCarriers} (compra mínima {shortPrice(STORE.minOrder)})</li>
+          <li>💵 {STORE.payments}</li>
+          <li>🔁 Cambios solo por falla, por el mismo artículo</li>
         </ul>
       </div>
     </div>

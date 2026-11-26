@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useCart } from "@/components/cart-provider";
 import { cartTotals } from "@/lib/cart-math";
-import { formatPrice, STORE } from "@/lib/config";
+import { formatPrice, shortPrice, STORE } from "@/lib/config";
 import { getSupabase } from "@/lib/supabase";
 import { clean, EMAIL_RE, LIMITS, PHONE_RE } from "@/lib/security";
 import { Honeypot } from "@/components/honeypot";
@@ -36,6 +36,9 @@ export default function CartPage() {
     if (!EMAIL_RE.test(fields.email)) return setError("Ingresá un email válido.");
     if (fields.phone && !PHONE_RE.test(fields.phone)) return setError("El teléfono solo puede tener números, espacios, +, - y paréntesis.");
     if (fields.address.length < 5) return setError("Ingresá una dirección de envío.");
+    const totals = cartTotals(items);
+    if (totals.subtotal - totals.discount < STORE.minOrder)
+      return setError(`La compra mínima para envíos es de ${shortPrice(STORE.minOrder)}.`);
 
     setLoading(true);
     const sb = getSupabase();
@@ -76,7 +79,7 @@ export default function CartPage() {
       </div>
     );
 
-  const missing = STORE.freeShippingFrom - (t.subtotal - t.discount);
+  const missing = STORE.minOrder - (t.subtotal - t.discount);
 
   return (
     <div className="mx-auto grid max-w-6xl gap-10 px-4 py-10 md:grid-cols-[1fr_380px]">
@@ -105,7 +108,9 @@ export default function CartPage() {
           ))}
         </ul>
         {missing > 0 && (
-          <p className="mt-4 text-sm">Te faltan <b>{formatPrice(missing)}</b> para tener envío gratis 🚚</p>
+          <p className="mt-4 text-sm">
+            La compra mínima para envíos es de <b>{shortPrice(STORE.minOrder)}</b>. Te faltan <b>{formatPrice(missing)}</b>.
+          </p>
         )}
       </section>
 
@@ -115,7 +120,7 @@ export default function CartPage() {
           {t.discount > 0 && (
             <div className="flex justify-between text-green-700"><dt>Descuento promo</dt><dd>−{formatPrice(t.discount)}</dd></div>
           )}
-          <div className="flex justify-between"><dt>Envío</dt><dd>{t.shipping ? formatPrice(t.shipping) : "Gratis"}</dd></div>
+          <div className="flex justify-between"><dt>Envío</dt><dd className="text-right text-neutral-600">Lo pagás al transporte</dd></div>
           <div className="flex justify-between border-t border-neutral-200 pt-2 text-lg font-bold"><dt>Total</dt><dd>{formatPrice(t.total)}</dd></div>
         </dl>
 
@@ -144,7 +149,7 @@ export default function CartPage() {
           <button disabled={loading} className="w-full bg-black py-3 text-sm font-bold tracking-widest text-white uppercase disabled:bg-neutral-400">
             {loading ? "Procesando..." : "Finalizar compra"}
           </button>
-          <p className="text-center text-[11px] text-neutral-500">No se cobra nada ahora: te contactamos para coordinar el pago y el envío.</p>
+          <p className="text-center text-[11px] text-neutral-500">No se cobra nada ahora: te contactamos por WhatsApp para coordinar el pago ({STORE.payments.toLowerCase()}) y el envío por {STORE.shippingCarriers}.</p>
         </form>
       </aside>
     </div>

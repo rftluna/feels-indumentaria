@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useCart } from "./cart-provider";
 import { Logo } from "./logo";
 import type { Category } from "@/lib/types";
+import { STORE, shortPrice } from "@/lib/config";
 
 export function Header({ categories }: { categories: Category[] }) {
   const { count } = useCart();
@@ -22,7 +23,7 @@ export function Header({ categories }: { categories: Category[] }) {
   return (
     <header className="sticky top-0 z-40 bg-white">
       <div className="bg-black py-2 text-center text-xs font-bold tracking-widest text-white uppercase">
-        ¡Envío gratis en compras +$10.000!
+        Envíos a todo el país · Compra mínima {shortPrice(STORE.minOrder)}
       </div>
 
       <div className="mx-auto grid max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 py-4">

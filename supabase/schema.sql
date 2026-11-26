@@ -217,7 +217,11 @@ begin
     end if;
   end loop;
 
-  v_shipping := case when (v_subtotal - v_discount) >= 10000 then 0 else 1500 end;
+  -- Compra mínima para pedidos con envío. El envío (Vía Cargo u otro) lo paga quien compra al transporte.
+  if (v_subtotal - v_discount) < 100000 then
+    raise exception 'La compra mínima para envíos es de $100.000.' using errcode = 'P0001';
+  end if;
+  v_shipping := 0;
 
   update orders
      set subtotal = v_subtotal,

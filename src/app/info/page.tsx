@@ -1,22 +1,34 @@
 import Link from "next/link";
-import { STORE } from "@/lib/config";
+import { STORE, shortPrice } from "@/lib/config";
 
 export const metadata = {
   title: "Información legal",
   description: `Preguntas frecuentes, devoluciones, términos y condiciones y política de privacidad de ${STORE.name}.`,
 };
 
+const waLink = `https://wa.me/${STORE.whatsapp}`;
+
+// Preguntas frecuentes: [pregunta, respuesta]
+const faq: [string, string][] = [
+  ["¿Tenés catálogo?", `Sí, pedilo por WhatsApp al ${STORE.whatsappLocal}.`],
+  ["¿Dónde están ubicados?", `Estamos en ${STORE.address}.`],
+  ["¿Qué horario atienden?", "Atendemos de lunes a sábado de 09:00 a 18:00 hs y los feriados de 10:00 a 16:00 hs."],
+  ["¿Cuál es la compra mínima para envíos?", `La compra mínima para envíos es de ${shortPrice(STORE.minOrder)}.`],
+  ["¿Cuál es la compra mínima en el local?", `En el local la compra mínima es de ${STORE.minItemsInStore} prendas.`],
+  ["¿Cuáles son las formas de pago?", "Podés pagar en efectivo en el local o con transferencia."],
+  ["¿Cómo hacen los envíos?", "Los envíos se hacen generalmente por Vía Cargo o por medio del transporte que prefieras. El costo del envío lo pagás directamente al transporte."],
+  ["¿Hacen devoluciones?", "Las devoluciones se realizan solo por falla y por el mismo artículo."],
+  ["¿Cómo elijo el talle?", "Las prendas son oversize: si preferís un calce más justo, elegí un talle menos."],
+];
+
 const sections: [string, string, string[]][] = [
-  ["faq", "Preguntas frecuentes", [
-    "¿Cuánto tarda el envío? Entre 2 y 7 días hábiles según la zona.",
-    "¿Cómo elijo el talle? Las prendas son oversize: si preferís un calce más justo, elegí un talle menos.",
-  ]],
   ["devoluciones", "Política de cambios y devoluciones", [
-    "Tenés 30 días desde que recibís tu compra para cambiarla. La prenda debe estar sin uso y con etiqueta.",
-    "Además, por ser una compra a distancia, tenés 10 días corridos para arrepentirte de la compra sin dar motivos (Ley 24.240, art. 34). Podés hacerlo con el Botón de arrepentimiento.",
+    "Los cambios y devoluciones se realizan solo por falla de la prenda y por el mismo artículo. Escribinos por WhatsApp con una foto de la falla para coordinarlo.",
+    "Además, si compraste por la web, la ley te da 10 días corridos desde que recibís el producto para arrepentirte de la compra sin dar motivos (Ley 24.240, art. 34). Podés hacerlo con el Botón de arrepentimiento.",
   ]],
   ["terminos", "Términos y condiciones", [
-    `${STORE.name} vende indumentaria oversize por internet. Por ahora el sitio no procesa pagos: después de hacer tu pedido te contactamos para coordinar el pago y el envío.`,
+    `${STORE.name} vende indumentaria oversize en su local de ${STORE.address} y por internet. El sitio no procesa pagos: después de hacer tu pedido te contactamos para coordinar el pago (efectivo en el local o transferencia) y el envío.`,
+    `La compra mínima para pedidos con envío es de ${shortPrice(STORE.minOrder)}. El envío se realiza por Vía Cargo o el transporte que elijas, y su costo lo abona quien compra.`,
     "Los precios están expresados en pesos argentinos e incluyen IVA. Las promociones aplican por producto y no son acumulables con otras ofertas.",
     "Nos reservamos el derecho de cancelar pedidos con datos falsos o sin stock disponible, devolviendo el stock reservado.",
   ]],
@@ -32,6 +44,20 @@ const sections: [string, string, string[]][] = [
 export default function Info() {
   return (
     <div className="mx-auto max-w-3xl space-y-12 px-4 py-14">
+      <section id="faq" className="scroll-mt-40">
+        <h2 className="text-xl font-bold tracking-wider uppercase">Preguntas frecuentes</h2>
+        <dl className="mt-4 divide-y divide-neutral-200 border-y border-neutral-200">
+          {faq.map(([q, a]) => (
+            <div key={q} className="py-4">
+              <dt className="font-semibold">{q}</dt>
+              <dd className="mt-1 text-neutral-700">{a}</dd>
+            </div>
+          ))}
+        </dl>
+        <a href={waLink} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block bg-black px-6 py-3 text-xs font-bold tracking-widest text-white uppercase hover:bg-neutral-800">
+          Pedir catálogo por WhatsApp
+        </a>
+      </section>
       {sections.map(([id, title, paragraphs]) => (
         <section key={id} id={id} className="scroll-mt-40">
           <h2 className="text-xl font-bold tracking-wider uppercase">{title}</h2>

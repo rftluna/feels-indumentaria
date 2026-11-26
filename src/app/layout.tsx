@@ -11,7 +11,7 @@ import { SITE_URL, STORE } from "@/lib/config";
 const sans = Archivo({ variable: "--font-archivo", subsets: ["latin"] });
 const logo = Permanent_Marker({ variable: "--font-marker", weight: "400", subsets: ["latin"] });
 
-const description = "Tienda online de ropa oversize: buzos, remeras, musculosas y shorts. Envío gratis desde $10.000.";
+const description = "Tienda online de ropa oversize: buzos, remeras, musculosas y shorts. Envíos a todo el país por Vía Cargo. Local en Av. Nazca 376, CABA.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

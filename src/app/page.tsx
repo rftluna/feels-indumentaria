@@ -41,18 +41,6 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-7xl gap-8 px-4 text-center md:grid-cols-3">
-        {[
-          ["Enviamos tu compra", "Envíos gratis en compras +$10.000"],
-          ["Chateá con nosotros", "Escribinos por WhatsApp con el botón verde"],
-          ["Pagá como quieras", "Tarjetas de crédito o débito, efectivo o transferencia"],
-        ].map(([t, d]) => (
-          <div key={t} className="border border-neutral-200 p-6">
-            <h3 className="font-bold tracking-wider uppercase">{t}</h3>
-            <p className="mt-2 text-sm text-neutral-600">{d}</p>
-          </div>
-        ))}
-      </section>
     </>
   );
 }

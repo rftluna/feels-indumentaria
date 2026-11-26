@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { STORE, formatPrice } from "@/lib/config";
+import { STORE, shortPrice } from "@/lib/config";
 import { getSupabase } from "@/lib/supabase";
 import { clean, EMAIL_RE, LIMITS } from "@/lib/security";
 import { Honeypot } from "@/components/honeypot";
@@ -62,18 +62,18 @@ function Benefits() {
     {
       icon: <TruckIcon />,
       title: "Enviamos tu compra",
-      text: `Envíos gratis en compras +${formatPrice(STORE.freeShippingFrom).replace(/,00$/, "").replace(/\s/g, "")}`,
+      text: `Por ${STORE.shippingCarriers}. Compra mínima ${shortPrice(STORE.minOrder)}`,
     },
     {
       icon: <ChatIcon />,
       title: "Chateá con nosotros",
-      text: "Haciendo click acá",
+      text: `Catálogo por WhatsApp: ${STORE.whatsappLocal}`,
       href: `https://wa.me/${STORE.whatsapp}`,
     },
     {
       icon: <CardIcon />,
       title: "Pagá como quieras",
-      text: "Tarjetas de crédito o débito, efectivo o transferencia con Mercado Pago",
+      text: STORE.payments,
     },
   ];
   return (
@@ -140,10 +140,11 @@ export function Footer() {
             </div>
             <div>
               <h4 className="mb-3 font-bold tracking-wide uppercase">Formas de envío</h4>
-              <span className="inline-block rounded-sm bg-[#FFCE00] px-2 py-1 text-[10px] leading-tight font-bold text-[#003876] uppercase">
-                Correo<br />Argentino
+              <span className="inline-block rounded-sm bg-white px-2 py-1 text-[11px] font-bold text-black uppercase">
+                Vía Cargo
               </span>
-              <p className="mt-2 text-neutral-300">Moto en CABA / GBA</p>
+              <p className="mt-2 text-neutral-300">o el transporte que prefieras.</p>
+              <p className="text-neutral-300">Compra mínima {shortPrice(STORE.minOrder)}.</p>
             </div>
             <div>
               <h4 className="mb-3 font-bold tracking-wide uppercase">Redes sociales</h4>

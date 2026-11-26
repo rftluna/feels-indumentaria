@@ -5,7 +5,7 @@ E-commerce full stack hecho con **Next.js 16 (App Router) + TypeScript + Tailwin
 ## Funcionalidades
 
 - Catálogo con categorías, buscador y página de detalle con selección de talle y cantidad
-- Promos tipo “X% OFF comprando 2 o más” y envío gratis desde $10.000
+- Promos tipo “X% OFF comprando 2 o más” y compra mínima de $100.000 para envíos (Vía Cargo o el transporte que elija quien compra)
 - Carrito persistente (localStorage)
 - Checkout que crea el pedido mediante una **función SQL (RPC) segura**: recalcula precios en la base, valida talles y stock, aplica descuentos y descuenta stock en una sola transacción
 - **Panel de administración** (`/admin`) con login de Supabase Auth: métricas, pedidos con cambio de estado y edición de precio / stock / visibilidad de productos
