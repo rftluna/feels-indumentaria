@@ -131,7 +131,9 @@ export function Footer() {
               <h4 className="mb-3 font-bold tracking-wide uppercase">Navegación</h4>
               <ul className="space-y-1.5 text-neutral-300">
                 <li><Link href="/productos" className="hover:text-white">Todos los productos</Link></li>
-                <li><Link href="/info#faq" className="hover:text-white">Preguntas frecuentes</Link></li>
+                <li><Link href="/como-comprar" className="hover:text-white">Cómo comprar</Link></li>
+                <li><Link href="/contacto" className="hover:text-white">Contacto</Link></li>
+                <li><Link href="/preguntas-frecuentes" className="hover:text-white">Preguntas frecuentes</Link></li>
                 <li><Link href="/info#devoluciones" className="hover:text-white">Política de devolución</Link></li>
                 <li><Link href="/info#terminos" className="hover:text-white">Términos y condiciones</Link></li>
                 <li><a href="#ubicacion" className="hover:text-white">Dónde estamos</a></li>
