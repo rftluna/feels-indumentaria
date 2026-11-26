@@ -46,6 +46,6 @@ npm run dev
 
 1. Subí el repo a GitHub.
 2. En <https://vercel.com/new> importá el repo.
-3. Agregá las variables `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY` y hacé deploy.
+3. Nombrá el proyecto `feelsindumentaria` (así la dirección queda feelsindumentaria.vercel.app) y agregá las variables `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY` y hacé deploy.
 
 > Nota: proyecto de portfolio, no procesa pagos reales. Imágenes de [Unsplash](https://unsplash.com).
