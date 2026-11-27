@@ -15,7 +15,7 @@ const sections: [string, string, string[]][] = [
     "Además, si compraste por la web, la ley te da 10 días corridos desde que recibís el producto para arrepentirte de la compra sin dar motivos (Ley 24.240, art. 34). Podés hacerlo con el Botón de arrepentimiento.",
   ]],
   ["terminos", "Términos y condiciones", [
-    `${STORE.name} vende indumentaria oversize en su local de ${STORE.address} y por internet. El sitio no procesa pagos: después de hacer tu pedido te contactamos para coordinar el pago (efectivo en el local o transferencia) y el envío.`,
+    `${STORE.name} vende indumentaria femenina en su local de ${STORE.address} y por internet. El sitio no procesa pagos: después de hacer tu pedido te contactamos para coordinar el pago (efectivo en el local o transferencia) y el envío.`,
     `La compra mínima para pedidos con envío es de ${shortPrice(STORE.minOrder)}. El envío se realiza por Vía Cargo o el transporte que elijas, y su costo lo abona quien compra.`,
     "Los precios están expresados en pesos argentinos e incluyen IVA. Las promociones aplican por producto y no son acumulables con otras ofertas.",
     "Nos reservamos el derecho de cancelar pedidos con datos falsos o sin stock disponible, devolviendo el stock reservado.",
