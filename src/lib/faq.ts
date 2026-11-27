@@ -10,5 +10,5 @@ export const faq: [string, string][] = [
   ["¿Cuáles son las formas de pago?", "Podés pagar en efectivo en el local o con transferencia."],
   ["¿Cómo hacen los envíos?", "Los envíos se hacen generalmente por Vía Cargo o por medio del transporte que prefieras. El costo del envío lo pagás directamente al transporte."],
   ["¿Hacen devoluciones?", "Las devoluciones se realizan solo por falla y por el mismo artículo."],
-  ["¿Cómo elijo el talle?", "Las prendas son oversize: si preferís un calce más justo, elegí un talle menos."],
+  ["¿Cómo elijo el talle?", "En la ficha de cada prenda ves los talles disponibles. Si tenés dudas sobre el calce, escribinos por WhatsApp y te asesoramos."],
 ];
