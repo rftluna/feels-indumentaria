@@ -2,12 +2,16 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useCart } from "./cart-provider";
 import { Logo } from "./logo";
+import { MenuLateral } from "./menu-lateral";
 import type { Category } from "@/lib/types";
+import { arbolCategorias } from "@/lib/categorias";
 import { STORE, shortPrice } from "@/lib/config";
 import { getSupabase } from "@/lib/supabase";
+
+const linkNav = "py-3 hover:underline underline-offset-4";
 
 export function Header({ categories }: { categories: Category[] }) {
   const { count } = useCart();
@@ -15,8 +19,9 @@ export function Header({ categories }: { categories: Category[] }) {
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [logueado, setLogueado] = useState(false);
+  const arbol = arbolCategorias(categories);
 
-  // Si hay una sesión iniciada (administración), mostramos "Cerrar sesión" en el encabezado
+  // Si hay una sesión iniciada (administración), mostramos "Cerrar sesión"
   useEffect(() => {
     const sb = getSupabase();
     if (!sb) return;
@@ -25,9 +30,10 @@ export function Header({ categories }: { categories: Category[] }) {
     return () => data.subscription.unsubscribe();
   }, []);
 
-  const search = (e: React.FormEvent) => {
-    e.preventDefault();
-    router.push(`/productos${q ? `?q=${encodeURIComponent(q)}` : ""}`);
+  const cerrarMenu = useCallback(() => setOpen(false), []);
+
+  const buscar = (texto: string) => {
+    router.push(`/productos${texto ? `?q=${encodeURIComponent(texto)}` : ""}`);
     setOpen(false);
   };
 
@@ -38,24 +44,26 @@ export function Header({ categories }: { categories: Category[] }) {
   };
 
   return (
+    <>
     <header className="sticky top-0 z-40 bg-white">
       <div className="bg-black py-2 text-center text-xs font-bold tracking-widest text-white uppercase">
         Envíos a todo el país · Compra mínima {shortPrice(STORE.minOrder)}
       </div>
 
       <div className="mx-auto grid max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 py-4">
-        <div className="flex items-center gap-3">
-          <button className="md:hidden" onClick={() => setOpen(!open)} aria-label="Abrir menú">
-            <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M3 12h18M3 18h18" /></svg>
+        <div className="flex items-center gap-5">
+          <button className="cursor-pointer" onClick={() => setOpen(true)} aria-label="Abrir menú" aria-expanded={open}>
+            <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 6h18M3 12h18M3 18h18" /></svg>
           </button>
-          <form onSubmit={search} className="hidden items-center border-b border-neutral-300 md:flex">
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Buscar"
-              className="w-40 py-1 text-sm outline-none"
-            />
-            <button aria-label="Buscar">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              buscar(q);
+            }}
+            className="hidden items-center border-b border-neutral-300 md:flex"
+          >
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar" aria-label="Buscar productos" className="w-40 py-1 text-sm outline-none" />
+            <button aria-label="Buscar" className="cursor-pointer">
               <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="8" cy="8" r="6" /><path d="m17 17-4.5-4.5" /></svg>
             </button>
           </form>
@@ -77,52 +85,44 @@ export function Header({ categories }: { categories: Category[] }) {
         </div>
       </div>
 
-      <nav className={`${open ? "block" : "hidden"} border-y border-neutral-200 md:block`}>
-        <ul className="mx-auto flex max-w-7xl flex-col items-center gap-3 px-4 py-3 text-sm font-semibold tracking-wider uppercase md:flex-row md:justify-center md:gap-10">
-          {open && (
-            <li className="w-full md:hidden">
-              <form onSubmit={search} className="flex border-b border-neutral-300">
-                <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar" className="flex-1 py-1 outline-none" />
-              </form>
-            </li>
-          )}
-          {categories.map((c) => (
-            <li key={c.id}>
-              <Link href={`/productos?categoria=${c.slug}`} onClick={() => setOpen(false)} className="hover:underline">
-                {c.name}
-              </Link>
-            </li>
-          ))}
-          <li>
-            <Link href="/como-comprar" onClick={() => setOpen(false)} className="hover:underline">
-              Cómo comprar
+      {/* En compu: barra con Productos desplegable. En celular todo va en el menú lateral. */}
+      <nav className="hidden border-y border-neutral-200 md:block">
+        <ul className="mx-auto flex max-w-7xl items-center justify-center gap-10 px-4 text-sm font-semibold tracking-wider uppercase">
+          <li><Link href="/productos?orden=nuevos" className={linkNav}>New in</Link></li>
+          <li className="group relative">
+            <Link href="/productos" className={`${linkNav} inline-flex items-center gap-1`} aria-haspopup="true">
+              Productos
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="m2 4 3 3 3-3" /></svg>
             </Link>
+            {arbol.length > 0 && (
+              <div className="invisible absolute top-full left-1/2 z-50 w-max min-w-56 -translate-x-1/2 border border-neutral-200 bg-white p-6 opacity-0 shadow-lg transition group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
+                <ul className="columns-2 gap-10 text-xs">
+                  <li className="mb-3 break-inside-avoid"><Link href="/productos" className="hover:underline">Ver todo</Link></li>
+                  {arbol.map((c) => (
+                    <li key={c.id} className="mb-3 break-inside-avoid">
+                      <Link href={`/productos?categoria=${c.slug}`} className="hover:underline">{c.name}</Link>
+                      {c.hijas.length > 0 && (
+                        <ul className="mt-1.5 space-y-1 pl-3 font-normal text-neutral-500 normal-case">
+                          {c.hijas.map((h) => (
+                            <li key={h.id}><Link href={`/productos?categoria=${h.slug}`} className="hover:text-black hover:underline">{h.name}</Link></li>
+                          ))}
+                        </ul>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </li>
-          <li>
-            <Link href="/contacto" onClick={() => setOpen(false)} className="hover:underline">
-              Contacto
-            </Link>
-          </li>
-          <li>
-            <Link href="/preguntas-frecuentes" onClick={() => setOpen(false)} className="hover:underline">
-              Preguntas frecuentes
-            </Link>
-          </li>
-          {/* En celular, Admin y Cerrar sesión van dentro del menú */}
-          <li className="md:hidden">
-            <Link href="/admin" onClick={() => setOpen(false)} className="hover:underline">
-              Admin
-            </Link>
-          </li>
-          {logueado && (
-            <li className="md:hidden">
-              <button onClick={cerrarSesion} className="cursor-pointer uppercase hover:underline">
-                Cerrar sesión
-              </button>
-            </li>
-          )}
+          <li><Link href="/productos?ofertas=1" className={linkNav}>Ofertas</Link></li>
+          <li><Link href="/como-comprar" className={linkNav}>Cómo comprar</Link></li>
+          <li><Link href="/contacto" className={linkNav}>Contacto</Link></li>
+          <li><Link href="/preguntas-frecuentes" className={linkNav}>Preguntas frecuentes</Link></li>
         </ul>
       </nav>
     </header>
+    {/* Fuera del <header> para quedar por encima de todo (botón de WhatsApp, aviso de cookies) */}
+    <MenuLateral abierto={open} onCerrar={cerrarMenu} categorias={arbol} logueado={logueado} onCerrarSesion={cerrarSesion} buscar={buscar} />
+    </>
   );
 }

@@ -3,6 +3,10 @@ export type Category = {
   slug: string;
   name: string;
   sort_order: number;
+  /** Categoría madre (null = categoría principal). Solo hay un nivel de subcategorías. */
+  parent_id: number | null;
+  /** false = oculta en la tienda (sigue visible en el panel) */
+  visible: boolean;
 };
 
 export type Product = {
