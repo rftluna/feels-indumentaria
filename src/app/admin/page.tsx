@@ -10,6 +10,9 @@ import { arbolCategorias, normalizarCategoria } from "@/lib/categorias";
 import { ChangePassword, Login } from "./auth-forms";
 import { CategoriasAdmin } from "./categorias-admin";
 import { FotosAdmin } from "./fotos-admin";
+import { ProductoForm } from "./producto-form";
+import Image from "next/image";
+import { borrarImagen } from "@/lib/imagenes";
 
 type Withdrawal = { id: number; order_id: number; name: string; email: string; reason: string | null; status: string; created_at: string };
 
@@ -115,6 +118,10 @@ function Dashboard({ email }: { email: string }) {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
+  // Formulario abierto: "nuevo" para crear, o el producto que se edita
+  const [editando, setEditando] = useState<Product | "nuevo" | null>(null);
+  const [aviso, setAviso] = useState<string | null>(null);
+  const [filtro, setFiltro] = useState("");
 
   const load = useCallback(async () => {
     const [o, p, w, c] = await Promise.all([
@@ -150,6 +157,20 @@ function Dashboard({ email }: { email: string }) {
     if (error) alert("No se pudo guardar el producto. Recargá la página y probá de nuevo.");
     load();
   };
+
+  const borrarProducto = async (p: Product) => {
+    if (!window.confirm(`¿Borrar “${p.name}”? No se puede deshacer.\nLos pedidos ya hechos conservan el nombre del producto.\nSi solo querés que no se vea, destildá “Activo”.`)) return;
+    const { error } = await sb.from("products").delete().eq("id", p.id);
+    if (error) {
+      setAviso("No se pudo borrar el producto. Probá de nuevo.");
+    } else {
+      await borrarImagen(sb, p.image_url);
+      setAviso(`Se borró “${p.name}”.`);
+    }
+    load();
+  };
+
+  const productosFiltrados = products.filter((p) => p.name.toLowerCase().includes(filtro.trim().toLowerCase()));
 
   const revenue = orders.filter((o) => o.status !== "cancelado").reduce((s, o) => s + Number(o.total), 0);
 
@@ -216,20 +237,48 @@ function Dashboard({ email }: { email: string }) {
           </table>
         </div>
       ) : (
-        <div className="space-y-2">
-          {products.map((p) => <ProductRow key={p.id} product={p} categories={categories} onSave={saveProduct} />)}
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <button onClick={() => { setAviso(null); setEditando("nuevo"); }} className="cursor-pointer bg-black px-4 py-2 text-xs font-bold text-white uppercase">+ Nuevo producto</button>
+            <input value={filtro} onChange={(e) => setFiltro(e.target.value)} placeholder="Buscar producto" aria-label="Buscar producto" className="w-56 border border-neutral-300 px-3 py-2 text-sm" />
+            <span className="text-xs text-neutral-500">{products.length} productos · {products.filter((p) => p.active).length} visibles en la tienda</span>
+          </div>
+          {aviso && <p className="border border-neutral-300 bg-neutral-50 p-3 text-sm">{aviso}</p>}
+          {productosFiltrados.length === 0 && <p className="py-6 text-center text-sm text-neutral-500">{products.length ? "Ningún producto coincide con la búsqueda." : "Todavía no hay productos. Creá el primero con “Nuevo producto”."}</p>}
+          {productosFiltrados.map((p) => (
+            <ProductRow key={JSON.stringify(p)} product={p} categories={categories} onSave={saveProduct}
+              onEdit={() => { setAviso(null); setEditando(p); }} onDelete={() => borrarProducto(p)} />
+          ))}
         </div>
+      )}
+
+      {editando && (
+        <ProductoForm
+          sb={sb}
+          categories={categories}
+          products={products}
+          producto={editando === "nuevo" ? undefined : editando}
+          onCerrar={() => setEditando(null)}
+          onGuardado={(msg) => { setEditando(null); setAviso(msg); load(); }}
+        />
       )}
     </>
   );
 }
 
-function ProductRow({ product, categories, onSave }: { product: Product; categories: Category[]; onSave: (p: Product) => void }) {
+type ProductRowProps = { product: Product; categories: Category[]; onSave: (p: Product) => void; onEdit: () => void; onDelete: () => void };
+
+function ProductRow({ product, categories, onSave, onEdit, onDelete }: ProductRowProps) {
   const [p, setP] = useState(product);
   const arbol = arbolCategorias(categories, false);
   return (
-    <div className="flex flex-wrap items-center gap-3 border border-neutral-200 p-3 text-sm">
-      <span className="flex-1 font-semibold uppercase">{p.name}</span>
+    <div className={`flex flex-wrap items-center gap-3 border border-neutral-200 p-3 text-sm ${p.active ? "" : "bg-neutral-50"}`}>
+      {p.image_url ? (
+        <Image src={p.image_url} alt="" width={45} height={60} unoptimized className="h-[60px] w-[45px] object-cover" />
+      ) : (
+        <div className="grid h-[60px] w-[45px] place-items-center bg-neutral-100 text-[9px] text-neutral-500 uppercase">Sin foto</div>
+      )}
+      <span className="flex-1 font-semibold uppercase">{p.name}{!p.active && <span className="ml-2 text-[10px] font-normal text-neutral-500">(oculto)</span>}</span>
       <label>Precio <input type="number" value={p.price} onChange={(e) => setP({ ...p, price: Number(e.target.value) })} className="w-24 border px-2 py-1" /></label>
       <label>Stock <input type="number" value={p.stock} onChange={(e) => setP({ ...p, stock: Number(e.target.value) })} className="w-16 border px-2 py-1" /></label>
       <label>Categoría{" "}
@@ -242,7 +291,9 @@ function ProductRow({ product, categories, onSave }: { product: Product; categor
         </select>
       </label>
       <label className="flex items-center gap-1"><input type="checkbox" checked={p.active} onChange={(e) => setP({ ...p, active: e.target.checked })} /> Activo</label>
-      <button onClick={() => onSave(p)} className="bg-black px-3 py-1 text-xs font-bold text-white uppercase">Guardar</button>
+      <button onClick={() => onSave(p)} className="cursor-pointer bg-black px-3 py-1 text-xs font-bold text-white uppercase">Guardar</button>
+      <button onClick={onEdit} className="cursor-pointer border border-black px-3 py-1 text-xs font-bold uppercase">Editar todo</button>
+      <button onClick={onDelete} className="cursor-pointer border border-neutral-400 px-3 py-1 text-xs uppercase text-red-700 hover:border-red-700">Borrar</button>
     </div>
   );
 }

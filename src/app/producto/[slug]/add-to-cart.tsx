@@ -31,12 +31,12 @@ export function AddToCart({ product }: { product: Product }) {
   return (
     <div className="mt-8">
       <p className="mb-2 text-xs font-bold tracking-wider uppercase">Talle</p>
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         {product.sizes.map((s) => (
           <button
             key={s}
             onClick={() => { setSize(s); setAdded(false); }}
-            className={`h-11 w-11 border text-sm font-semibold ${size === s ? "border-black bg-black text-white" : "border-neutral-300 hover:border-black"}`}
+            className={`h-11 min-w-11 border px-3 text-sm font-semibold ${size === s ? "border-black bg-black text-white" : "border-neutral-300 hover:border-black"}`}
           >
             {s}
           </button>
