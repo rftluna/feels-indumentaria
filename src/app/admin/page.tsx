@@ -7,7 +7,7 @@ import { formatPrice } from "@/lib/config";
 import { ADMIN_IDLE_MINUTES } from "@/lib/security";
 import type { Category, Order, Product } from "@/lib/types";
 import { arbolCategorias, normalizarCategoria } from "@/lib/categorias";
-import { ChangePassword, Login } from "./auth-forms";
+import { ChangePassword, Login } from "@/components/auth-forms";
 import { CategoriasAdmin } from "./categorias-admin";
 import { FotosAdmin } from "./fotos-admin";
 import { ProductoForm } from "./producto-form";

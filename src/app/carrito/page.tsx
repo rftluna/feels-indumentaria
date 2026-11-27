@@ -3,13 +3,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCart } from "@/components/cart-provider";
 import { cartTotals } from "@/lib/cart-math";
 import { formatPrice, shortPrice, STORE } from "@/lib/config";
 import { getSupabase } from "@/lib/supabase";
 import { clean, EMAIL_RE, LIMITS, PHONE_RE } from "@/lib/security";
 import { Honeypot } from "@/components/honeypot";
+import { useSesion } from "@/lib/use-sesion";
 
 export default function CartPage() {
   const { items, loaded, setQty, remove, clear } = useCart();
@@ -18,6 +19,20 @@ export default function CartPage() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", address: "", website: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const { user, datos } = useSesion();
+
+  // Con la sesión iniciada, completamos con los datos guardados en la cuenta (sin pisar lo que ya escribió)
+  useEffect(() => {
+    if (!user) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- completar el formulario con los datos de la cuenta
+    setForm((f) => ({
+      ...f,
+      name: f.name || datos.nombre || "",
+      email: user.email ?? f.email,
+      phone: f.phone || datos.telefono || "",
+      address: f.address || datos.direccion || "",
+    }));
+  }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const checkout = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,7 +43,8 @@ export default function CartPage() {
     // Validación en el navegador (la base vuelve a validar todo igual)
     const fields = {
       name: clean(form.name, LIMITS.name),
-      email: clean(form.email, LIMITS.email).toLowerCase(),
+      // Con cuenta, el pedido va con el email de la cuenta
+      email: clean(user?.email ?? form.email, LIMITS.email).toLowerCase(),
       phone: clean(form.phone, LIMITS.phone),
       address: clean(form.address, LIMITS.address),
     };
@@ -62,6 +78,12 @@ export default function CartPage() {
         return;
       }
       orderId = data as number;
+      // Guardamos en la cuenta los datos que todavía no tenía (para la próxima compra)
+      if (user && (!datos.nombre || !datos.telefono || !datos.direccion)) {
+        await sb.auth.updateUser({
+          data: { nombre: datos.nombre || fields.name, telefono: datos.telefono || fields.phone, direccion: datos.direccion || fields.address },
+        });
+      }
     }
     clear();
     router.push(`/gracias?orden=${orderId}`);
@@ -127,6 +149,13 @@ export default function CartPage() {
         <form onSubmit={checkout} noValidate className="relative mt-6 space-y-3">
           <Honeypot value={form.website} onChange={(v) => setForm({ ...form, website: v })} />
           <h2 className="text-xs font-bold tracking-wider uppercase">Tus datos</h2>
+          {user ? (
+            <p className="text-xs text-neutral-600">Comprás con tu cuenta: el pedido va a aparecer en <Link href="/mi-cuenta" className="underline">Mi cuenta</Link>.</p>
+          ) : (
+            <p className="text-xs text-neutral-600">
+              ¿Tenés cuenta? <Link href="/mi-cuenta?volver=/carrito" className="underline">Ingresá</Link> para seguir tu pedido desde Mi cuenta. También podés comprar sin cuenta.
+            </p>
+          )}
           {([
             ["name", "Nombre y apellido", "text", true],
             ["email", "Email", "email", true],
@@ -142,7 +171,8 @@ export default function CartPage() {
               autoComplete={{ name: "name", email: "email", phone: "tel", address: "street-address" }[k]}
               value={form[k]}
               onChange={(e) => setForm({ ...form, [k]: e.target.value })}
-              className="w-full border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-black"
+              readOnly={k === "email" && Boolean(user)}
+              className="w-full border border-neutral-300 px-3 py-2 text-sm outline-none read-only:bg-neutral-50 read-only:text-neutral-500 focus:border-black"
             />
           ))}
           {error && <p className="text-sm text-red-600">{error}</p>}

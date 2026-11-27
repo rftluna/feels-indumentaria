@@ -9,6 +9,7 @@ type Props = {
   onCerrar: () => void;
   categorias: NodoCategoria[];
   logueado: boolean;
+  esAdmin: boolean;
   onCerrarSesion: () => void;
   buscar: (q: string) => void;
 };
@@ -16,7 +17,7 @@ type Props = {
 const fila = "flex w-full items-center justify-between border-b border-neutral-200 py-4 text-left text-base tracking-wider uppercase";
 
 /** Menú lateral (estilo tienda de moda): Productos se despliega con sus categorías y subcategorías. */
-export function MenuLateral({ abierto, onCerrar, categorias, logueado, onCerrarSesion, buscar }: Props) {
+export function MenuLateral({ abierto, onCerrar, categorias, logueado, esAdmin, onCerrarSesion, buscar }: Props) {
   const [productosAbierto, setProductosAbierto] = useState(true);
   const [abiertas, setAbiertas] = useState<number[]>([]);
   const [q, setQ] = useState("");
@@ -107,10 +108,11 @@ export function MenuLateral({ abierto, onCerrar, categorias, logueado, onCerrarS
           <Link href="/como-comprar" onClick={onCerrar} className={`${fila} text-neutral-500 hover:text-black`}>Cómo comprar</Link>
           <Link href="/contacto" onClick={onCerrar} className={`${fila} text-neutral-500 hover:text-black`}>Contacto</Link>
           <Link href="/preguntas-frecuentes" onClick={onCerrar} className={`${fila} text-neutral-500 hover:text-black`}>Preguntas frecuentes</Link>
+          <Link href="/mi-cuenta" onClick={onCerrar} className={`${fila} text-neutral-500 hover:text-black`}>{logueado ? "Mi cuenta" : "Ingresar / Crear cuenta"}</Link>
         </nav>
 
         <div className="mt-8 flex gap-6 text-xs tracking-widest text-neutral-500 uppercase">
-          <Link href="/admin" onClick={onCerrar} className="hover:text-black">Admin</Link>
+          <Link href="/admin" onClick={onCerrar} className="hover:text-black">{esAdmin ? "Panel" : "Admin"}</Link>
           {logueado && (
             <button onClick={onCerrarSesion} className="cursor-pointer uppercase hover:text-black">Cerrar sesión</button>
           )}

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useCart } from "./cart-provider";
 import { Logo } from "./logo";
 import { MenuLateral } from "./menu-lateral";
@@ -10,6 +10,7 @@ import type { Category } from "@/lib/types";
 import { arbolCategorias } from "@/lib/categorias";
 import { STORE, shortPrice } from "@/lib/config";
 import { getSupabase } from "@/lib/supabase";
+import { useEsAdmin, useSesion } from "@/lib/use-sesion";
 
 const linkNav = "py-3 hover:underline underline-offset-4";
 
@@ -18,17 +19,12 @@ export function Header({ categories }: { categories: Category[] }) {
   const router = useRouter();
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
-  const [logueado, setLogueado] = useState(false);
   const arbol = arbolCategorias(categories);
-
-  // Si hay una sesión iniciada (administración), mostramos "Cerrar sesión"
-  useEffect(() => {
-    const sb = getSupabase();
-    if (!sb) return;
-    sb.auth.getSession().then(({ data }) => setLogueado(Boolean(data.session)));
-    const { data } = sb.auth.onAuthStateChange((_event, s) => setLogueado(Boolean(s)));
-    return () => data.subscription.unsubscribe();
-  }, []);
+  // Sesión de clienta o de administración
+  const { user, datos } = useSesion();
+  const logueado = Boolean(user);
+  const esAdmin = useEsAdmin(user?.id);
+  const nombre = datos.nombre?.split(" ")[0];
 
   const cerrarMenu = useCallback(() => setOpen(false), []);
 
@@ -72,7 +68,11 @@ export function Header({ categories }: { categories: Category[] }) {
         <Logo />
 
         <div className="flex items-center justify-end gap-4 text-xs font-semibold uppercase">
-          <Link href="/admin" className="hidden hover:underline md:inline">Admin</Link>
+          {esAdmin && <Link href="/admin" className="hidden hover:underline md:inline">Panel</Link>}
+          <Link href="/mi-cuenta" className="flex items-center gap-1.5 hover:underline" aria-label={logueado ? "Mi cuenta" : "Ingresar o crear cuenta"}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" /></svg>
+            <span className="hidden md:inline">{logueado ? (nombre ? `Hola, ${nombre}` : "Mi cuenta") : "Ingresar"}</span>
+          </Link>
           {logueado && (
             <button onClick={cerrarSesion} className="hidden cursor-pointer uppercase hover:underline md:inline">
               Cerrar sesión
@@ -122,7 +122,7 @@ export function Header({ categories }: { categories: Category[] }) {
       </nav>
     </header>
     {/* Fuera del <header> para quedar por encima de todo (botón de WhatsApp, aviso de cookies) */}
-    <MenuLateral abierto={open} onCerrar={cerrarMenu} categorias={arbol} logueado={logueado} onCerrarSesion={cerrarSesion} buscar={buscar} />
+    <MenuLateral abierto={open} onCerrar={cerrarMenu} categorias={arbol} logueado={logueado} esAdmin={esAdmin} onCerrarSesion={cerrarSesion} buscar={buscar} />
     </>
   );
 }
