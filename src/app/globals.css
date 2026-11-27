@@ -1,11 +1,46 @@
 @import "tailwindcss";
 
+/*
+ * Estética femenina / chic:
+ * - "negro" pasa a ser un espresso cálido y los grises son tonos tostados
+ * - rosa empolvado para fondos suaves (barra superior, pie, etiquetas)
+ */
+@theme {
+  --color-black: #2b2321;
+  --color-neutral-50: #fbf8f6;
+  --color-neutral-100: #f4eeea;
+  --color-neutral-200: #e9e0da;
+  --color-neutral-300: #d9ccc4;
+  --color-neutral-400: #b9a89e;
+  --color-neutral-500: #8f7d73;
+  --color-neutral-600: #6f5f57;
+  --color-neutral-700: #574a44;
+  --color-neutral-800: #3d3330;
+  --color-neutral-900: #2b2321;
+
+  --color-rosa-50: #fcf6f4;
+  --color-rosa-100: #f7ebe7;
+  --color-rosa-200: #eed6cf;
+  --color-rosa-300: #e2bdb2;
+  --color-rosa-500: #c4958a;
+  --color-rosa-700: #8e5f56;
+}
+
 @theme inline {
-  --font-sans: var(--font-archivo);
-  --font-logo: var(--font-marker);
+  --font-sans: var(--font-jost);
+  --font-logo: var(--font-cormorant);
+  --font-serif: var(--font-cormorant);
 }
 
 body {
-  background: #fff;
-  color: #111;
+  background: #fdfaf8;
+  color: #2b2321;
+}
+
+/* Títulos en serif fina (fuera de @layer para que mande sobre font-bold) */
+h1,
+h2 {
+  font-family: var(--font-cormorant);
+  font-weight: 500;
+  letter-spacing: 0.08em;
 }

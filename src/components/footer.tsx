@@ -83,7 +83,7 @@ function Benefits() {
           <>
             {it.icon}
             <div>
-              <p className="text-sm font-bold tracking-wide uppercase">{it.title}</p>
+              <p className="text-sm font-medium tracking-[0.15em] uppercase">{it.title}</p>
               <p className="text-sm text-neutral-600">{it.text}</p>
             </div>
           </>
@@ -125,31 +125,31 @@ export function Footer() {
       <Benefits />
       <LocationMap />
       <footer>
-        <div className="bg-neutral-900 text-white">
+        <div className="bg-rosa-100 text-black">
           <div className="mx-auto grid max-w-5xl gap-10 px-4 py-10 text-sm sm:grid-cols-2 md:grid-cols-[1fr_1fr_1.4fr]">
             <div>
-              <h4 className="mb-3 font-bold tracking-wide uppercase">Navegación</h4>
-              <ul className="space-y-1.5 text-neutral-300">
-                <li><Link href="/productos" className="hover:text-white">Todos los productos</Link></li>
-                <li><Link href="/como-comprar" className="hover:text-white">Cómo comprar</Link></li>
-                <li><Link href="/contacto" className="hover:text-white">Contacto</Link></li>
-                <li><Link href="/preguntas-frecuentes" className="hover:text-white">Preguntas frecuentes</Link></li>
-                <li><Link href="/info#devoluciones" className="hover:text-white">Política de devolución</Link></li>
-                <li><Link href="/info#terminos" className="hover:text-white">Términos y condiciones</Link></li>
-                <li><a href="#ubicacion" className="hover:text-white">Dónde estamos</a></li>
-                <li><Link href="/info#privacidad" className="hover:text-white">Política de privacidad</Link></li>
+              <h4 className="mb-3 font-medium tracking-[0.15em] uppercase">Navegación</h4>
+              <ul className="space-y-1.5 text-neutral-600">
+                <li><Link href="/productos" className="hover:text-black">Todos los productos</Link></li>
+                <li><Link href="/como-comprar" className="hover:text-black">Cómo comprar</Link></li>
+                <li><Link href="/contacto" className="hover:text-black">Contacto</Link></li>
+                <li><Link href="/preguntas-frecuentes" className="hover:text-black">Preguntas frecuentes</Link></li>
+                <li><Link href="/info#devoluciones" className="hover:text-black">Política de devolución</Link></li>
+                <li><Link href="/info#terminos" className="hover:text-black">Términos y condiciones</Link></li>
+                <li><a href="#ubicacion" className="hover:text-black">Dónde estamos</a></li>
+                <li><Link href="/info#privacidad" className="hover:text-black">Política de privacidad</Link></li>
               </ul>
             </div>
             <div>
-              <h4 className="mb-3 font-bold tracking-wide uppercase">Formas de envío</h4>
+              <h4 className="mb-3 font-medium tracking-[0.15em] uppercase">Formas de envío</h4>
               <span className="inline-block rounded-sm bg-white px-2 py-1 text-[11px] font-bold text-black uppercase">
                 Vía Cargo
               </span>
-              <p className="mt-2 text-neutral-300">o el transporte que prefieras.</p>
-              <p className="text-neutral-300">Compra mínima {shortPrice(STORE.minOrder)}.</p>
+              <p className="mt-2 text-neutral-600">o el transporte que prefieras.</p>
+              <p className="text-neutral-600">Compra mínima {shortPrice(STORE.minOrder)}.</p>
             </div>
             <div>
-              <h4 className="mb-3 font-bold tracking-wide uppercase">Redes sociales</h4>
+              <h4 className="mb-3 font-medium tracking-[0.15em] uppercase">Redes sociales</h4>
               <a
                 href={STORE.instagram}
                 target="_blank"
@@ -159,7 +159,7 @@ export function Footer() {
               >
                 <InstagramIcon />
               </a>
-              <h4 className="mt-6 mb-3 font-bold tracking-wide uppercase">Newsletter</h4>
+              <h4 className="mt-6 mb-3 font-medium tracking-[0.15em] uppercase">Newsletter</h4>
               <form onSubmit={subscribe} className="relative flex max-w-60">
                 <Honeypot value={trap} onChange={setTrap} />
                 <input
@@ -170,13 +170,13 @@ export function Footer() {
                   placeholder="Email"
                   aria-label="Tu email"
                   maxLength={LIMITS.email}
-                  className="min-w-0 flex-1 border border-white bg-neutral-900 px-3 py-2 text-white outline-none placeholder:text-neutral-400"
+                  className="min-w-0 flex-1 border border-black bg-white px-3 py-2 text-black outline-none placeholder:text-neutral-400"
                 />
-                <button aria-label="Suscribirme" className="grid w-11 place-items-center border border-white bg-white text-black hover:bg-neutral-200">
+                <button aria-label="Suscribirme" className="grid w-11 place-items-center border border-black bg-black text-white hover:bg-neutral-800">
                   <SendIcon />
                 </button>
               </form>
-              {msg && <p className="mt-2 text-xs text-neutral-300">{msg}</p>}
+              {msg && <p className="mt-2 text-xs text-neutral-600">{msg}</p>}
             </div>
           </div>
         </div>

@@ -5,8 +5,10 @@ import type { Session } from "@supabase/supabase-js";
 import { getSupabase } from "@/lib/supabase";
 import { formatPrice } from "@/lib/config";
 import { ADMIN_IDLE_MINUTES } from "@/lib/security";
-import type { Order, Product } from "@/lib/types";
+import type { Category, Order, Product } from "@/lib/types";
+import { arbolCategorias, normalizarCategoria } from "@/lib/categorias";
 import { ChangePassword, Login } from "./auth-forms";
+import { CategoriasAdmin } from "./categorias-admin";
 import { FotosAdmin } from "./fotos-admin";
 
 type Withdrawal = { id: number; order_id: number; name: string; email: string; reason: string | null; status: string; created_at: string };
@@ -108,20 +110,23 @@ function Shell({ children }: { children: React.ReactNode }) {
 
 function Dashboard({ email }: { email: string }) {
   const sb = getSupabase()!;
-  const [tab, setTab] = useState<"orders" | "products" | "photos" | "withdrawals" | "access">("orders");
+  const [tab, setTab] = useState<"orders" | "products" | "categories" | "photos" | "withdrawals" | "access">("orders");
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
 
   const load = useCallback(async () => {
-    const [o, p, w] = await Promise.all([
+    const [o, p, w, c] = await Promise.all([
       sb.from("orders").select("*, order_items(*)").order("created_at", { ascending: false }),
       sb.from("products").select("*").order("id"),
       sb.from("withdrawals").select("*").order("created_at", { ascending: false }),
+      sb.from("categories").select("*").order("sort_order"),
     ]);
     setOrders(o.data ?? []);
     setProducts(p.data ?? []);
     setWithdrawals(w.data ?? []);
+    setCategories((c.data ?? []).map(normalizarCategoria));
   }, [sb]);
 
   useEffect(() => {
@@ -141,7 +146,8 @@ function Dashboard({ email }: { email: string }) {
       alert("Precio y stock tienen que ser números positivos.");
       return;
     }
-    await sb.from("products").update({ price: p.price, stock: p.stock, active: p.active }).eq("id", p.id);
+    const { error } = await sb.from("products").update({ price: p.price, stock: p.stock, active: p.active, category_id: p.category_id }).eq("id", p.id);
+    if (error) alert("No se pudo guardar el producto. Recargá la página y probá de nuevo.");
     load();
   };
 
@@ -155,16 +161,18 @@ function Dashboard({ email }: { email: string }) {
         <Stat label="Productos activos" value={String(products.filter((p) => p.active).length)} />
       </div>
 
-      <div className="mb-4 flex gap-2 text-xs font-bold uppercase">
-        {(["orders", "products", "photos", "withdrawals", "access"] as const).map((t) => (
+      <div className="mb-4 flex flex-wrap gap-2 text-xs font-bold uppercase">
+        {(["orders", "products", "categories", "photos", "withdrawals", "access"] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)} className={`border px-4 py-2 ${tab === t ? "bg-black text-white" : "border-neutral-300"}`}>
-            {{ orders: "Pedidos", products: "Productos", photos: "Fotos", withdrawals: `Arrepentimientos (${withdrawals.filter((w) => w.status === "pendiente").length})`, access: "Acceso" }[t]}
+            {{ orders: "Pedidos", products: "Productos", categories: "Categorías", photos: "Fotos", withdrawals: `Arrepentimientos (${withdrawals.filter((w) => w.status === "pendiente").length})`, access: "Acceso" }[t]}
           </button>
         ))}
       </div>
 
       {tab === "access" ? (
         <ChangePassword email={email} />
+      ) : tab === "categories" ? (
+        <CategoriasAdmin sb={sb} categorias={categories} products={products} onChange={load} />
       ) : tab === "photos" ? (
         <FotosAdmin sb={sb} products={products} onChange={load} />
       ) : tab === "withdrawals" ? (
@@ -209,20 +217,30 @@ function Dashboard({ email }: { email: string }) {
         </div>
       ) : (
         <div className="space-y-2">
-          {products.map((p) => <ProductRow key={p.id} product={p} onSave={saveProduct} />)}
+          {products.map((p) => <ProductRow key={p.id} product={p} categories={categories} onSave={saveProduct} />)}
         </div>
       )}
     </>
   );
 }
 
-function ProductRow({ product, onSave }: { product: Product; onSave: (p: Product) => void }) {
+function ProductRow({ product, categories, onSave }: { product: Product; categories: Category[]; onSave: (p: Product) => void }) {
   const [p, setP] = useState(product);
+  const arbol = arbolCategorias(categories, false);
   return (
     <div className="flex flex-wrap items-center gap-3 border border-neutral-200 p-3 text-sm">
       <span className="flex-1 font-semibold uppercase">{p.name}</span>
       <label>Precio <input type="number" value={p.price} onChange={(e) => setP({ ...p, price: Number(e.target.value) })} className="w-24 border px-2 py-1" /></label>
       <label>Stock <input type="number" value={p.stock} onChange={(e) => setP({ ...p, stock: Number(e.target.value) })} className="w-16 border px-2 py-1" /></label>
+      <label>Categoría{" "}
+        <select value={p.category_id ?? ""} onChange={(e) => setP({ ...p, category_id: e.target.value ? Number(e.target.value) : null })} className="max-w-48 border px-2 py-1">
+          <option value="">Sin categoría</option>
+          {arbol.map((c) => [
+            <option key={c.id} value={c.id}>{c.name}</option>,
+            ...c.hijas.map((h) => <option key={h.id} value={h.id}>{"\u00a0\u00a0— "}{h.name}</option>),
+          ])}
+        </select>
+      </label>
       <label className="flex items-center gap-1"><input type="checkbox" checked={p.active} onChange={(e) => setP({ ...p, active: e.target.checked })} /> Activo</label>
       <button onClick={() => onSave(p)} className="bg-black px-3 py-1 text-xs font-bold text-white uppercase">Guardar</button>
     </div>

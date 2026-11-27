@@ -17,7 +17,7 @@ export function ProductCard({ product }: { product: Product }) {
           />
         )}
         {product.promo_label && (
-          <span className="absolute top-2 left-2 bg-black px-2 py-1 text-[10px] leading-tight font-bold text-white uppercase">
+          <span className="absolute top-2 left-2 bg-rosa-100 px-2 py-1 text-[10px] leading-tight font-medium tracking-wider text-black uppercase">
             {product.promo_label}
             <br />
             comprando {product.promo_min_qty} o más
@@ -27,7 +27,7 @@ export function ProductCard({ product }: { product: Product }) {
           <span className="absolute inset-x-0 bottom-0 bg-white/90 py-1 text-center text-xs font-bold uppercase">Sin stock</span>
         )}
       </div>
-      <h3 className="mt-3 text-center text-sm font-semibold tracking-wide uppercase">{product.name}</h3>
+      <h3 className="mt-3 text-center text-[13px] font-normal tracking-[0.12em] uppercase">{product.name}</h3>
       <p className="text-center text-sm">{formatPrice(product.price)}</p>
     </Link>
   );

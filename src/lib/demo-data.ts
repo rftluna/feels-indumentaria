@@ -3,10 +3,10 @@
 import type { Category, Product } from "./types";
 
 export const demoCategories: Category[] = [
-  { id: 1, slug: "remeras-oversize", name: "Remeras Oversize", sort_order: 1 },
-  { id: 2, slug: "musculosas-oversize", name: "Musculosas Oversize", sort_order: 2 },
-  { id: 3, slug: "buzos-oversize", name: "Buzos Oversize", sort_order: 3 },
-  { id: 4, slug: "shorts", name: "Shorts", sort_order: 4 },
+  { id: 1, slug: "remeras-oversize", name: "Remeras Oversize", sort_order: 1, parent_id: null, visible: true },
+  { id: 2, slug: "musculosas-oversize", name: "Musculosas Oversize", sort_order: 2, parent_id: null, visible: true },
+  { id: 3, slug: "buzos-oversize", name: "Buzos Oversize", sort_order: 3, parent_id: null, visible: true },
+  { id: 4, slug: "shorts", name: "Shorts", sort_order: 4, parent_id: null, visible: true },
 ];
 
 const img = (id: string) => `https://images.unsplash.com/${id}?w=800&q=80`;

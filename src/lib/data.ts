@@ -1,6 +1,7 @@
 import { getSupabase } from "./supabase";
 import { demoCategories, demoProducts } from "./demo-data";
 import { PORTADA_DEFAULT } from "./imagenes";
+import { idsDeCategoria, normalizarCategoria } from "./categorias";
 import type { Category, Product } from "./types";
 
 const toProduct = (p: Product): Product => ({ ...p, price: Number(p.price) });
@@ -10,34 +11,49 @@ export async function getCategories(): Promise<Category[]> {
   if (!sb) return demoCategories;
   const { data, error } = await sb.from("categories").select("*").order("sort_order");
   if (error) throw new Error(error.message);
-  return data ?? [];
+  return (data ?? []).map(normalizarCategoria);
 }
 
-export async function getProducts(opts: { categorySlug?: string; q?: string; limit?: number } = {}): Promise<Product[]> {
+type FiltrosProductos = {
+  categorySlug?: string;
+  q?: string;
+  limit?: number;
+  /** Novedades: los últimos productos cargados primero */
+  nuevos?: boolean;
+  /** Solo productos con promoción */
+  ofertas?: boolean;
+};
+
+export async function getProducts(opts: FiltrosProductos = {}): Promise<Product[]> {
   const sb = getSupabase();
   // Saneamos lo que llega por la URL: largo máximo y sin comodines de SQL (% _)
   if (opts.q) opts = { ...opts, q: opts.q.replace(/[%_\\]/g, "").trim().slice(0, 60) || undefined };
   if (opts.categorySlug && !/^[a-z0-9-]{1,60}$/.test(opts.categorySlug)) return [];
 
+  // Una categoría incluye los productos de sus subcategorías
+  let ids: number[] | null = null;
+  if (opts.categorySlug) {
+    ids = idsDeCategoria(await getCategories(), opts.categorySlug);
+    if (!ids) return [];
+  }
+
   if (!sb) {
     let list = demoProducts;
-    if (opts.categorySlug) {
-      const cat = demoCategories.find((c) => c.slug === opts.categorySlug);
-      list = list.filter((p) => p.category_id === cat?.id);
-    }
+    if (ids) list = list.filter((p) => p.category_id !== null && ids.includes(p.category_id));
     if (opts.q) {
       const q = opts.q.toLowerCase();
       list = list.filter((p) => p.name.toLowerCase().includes(q));
     }
+    if (opts.ofertas) list = list.filter((p) => p.promo_percent !== null);
+    if (opts.nuevos) list = [...list].sort((a, b) => b.id - a.id);
     return opts.limit ? list.slice(0, opts.limit) : list;
   }
 
-  // "!inner" hace un JOIN que permite filtrar por el slug de la categoría
-  let query = opts.categorySlug
-    ? sb.from("products").select("*, categories!inner(slug)").eq("categories.slug", opts.categorySlug)
-    : sb.from("products").select("*");
-  query = query.eq("active", true).order("id");
+  let query = sb.from("products").select("*").eq("active", true);
+  if (ids) query = query.in("category_id", ids);
+  if (opts.ofertas) query = query.not("promo_percent", "is", null);
   if (opts.q) query = query.ilike("name", `%${opts.q}%`);
+  query = opts.nuevos ? query.order("created_at", { ascending: false }).order("id", { ascending: false }) : query.order("id");
   if (opts.limit) query = query.limit(opts.limit);
 
   const { data, error } = await query;

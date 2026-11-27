@@ -13,16 +13,16 @@ export default async function Home() {
       <section className="relative mx-auto h-[60vh] max-w-7xl overflow-hidden md:h-[75vh]">
         <Image
           src={portada}
-          alt="Colección oversize"
+          alt="Nueva colección"
           fill
           priority
           sizes="100vw"
           className="object-cover"
         />
-        <div className="absolute inset-0 bg-black/25" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/35 via-transparent to-transparent" />
         <Link
           href="/productos"
-          className="font-logo absolute bottom-10 left-1/2 -translate-x-1/2 text-4xl text-white drop-shadow-lg transition hover:scale-105 md:text-6xl"
+          className="font-logo absolute bottom-12 left-1/2 -translate-x-1/2 border-b border-white/70 pb-1 text-4xl font-medium tracking-wide whitespace-nowrap text-white italic drop-shadow transition hover:border-white md:text-6xl"
         >
           Shop now
         </Link>
