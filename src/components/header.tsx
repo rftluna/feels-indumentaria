@@ -46,7 +46,7 @@ export function Header({ categories }: { categories: Category[] }) {
   return (
     <>
     <header className="sticky top-0 z-40 bg-white">
-      <div className="bg-black py-2 text-center text-xs font-bold tracking-widest text-white uppercase">
+      <div className="bg-rosa-100 py-2 text-center text-[11px] font-medium tracking-[0.2em] text-black uppercase">
         Envíos a todo el país · Compra mínima {shortPrice(STORE.minOrder)}
       </div>
 
@@ -80,14 +80,14 @@ export function Header({ categories }: { categories: Category[] }) {
           )}
           <Link href="/carrito" className="relative flex items-center gap-1" aria-label="Carrito">
             <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3h2l2.4 12h11.2L21 7H6.2" /><circle cx="9" cy="20" r="1.5" /><circle cx="18" cy="20" r="1.5" /></svg>
-            <span className="grid h-5 min-w-5 place-items-center rounded-full bg-black px-1 text-[10px] text-white">{count}</span>
+            <span className="grid h-5 min-w-5 place-items-center rounded-full bg-rosa-200 px-1 text-[10px] text-black">{count}</span>
           </Link>
         </div>
       </div>
 
       {/* En compu: barra con Productos desplegable. En celular todo va en el menú lateral. */}
       <nav className="hidden border-y border-neutral-200 md:block">
-        <ul className="mx-auto flex max-w-7xl items-center justify-center gap-10 px-4 text-sm font-semibold tracking-wider uppercase">
+        <ul className="mx-auto flex max-w-7xl items-center justify-center gap-10 px-4 text-[13px] font-normal tracking-[0.18em] uppercase">
           <li><Link href="/productos?orden=nuevos" className={linkNav}>New in</Link></li>
           <li className="group relative">
             <Link href="/productos" className={`${linkNav} inline-flex items-center gap-1`} aria-haspopup="true">

@@ -4,7 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 export const BUCKET = "fotos";
 
 /** Portada que se muestra si todavía no se subió una desde el panel */
-export const PORTADA_DEFAULT = "https://images.unsplash.com/photo-1523398002811-999ca8dec234?w=1600&q=70";
+export const PORTADA_DEFAULT = "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=1600&q=70";
 
 const TIPOS: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
 const MAX_MB = 5;

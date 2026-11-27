@@ -49,7 +49,7 @@ export function MenuLateral({ abierto, onCerrar, categorias, logueado, onCerrarS
         <button onClick={onCerrar} aria-label="Cerrar menú" className="-ml-1 w-fit cursor-pointer text-neutral-500 hover:text-black">
           <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><path d="M5 5l14 14M19 5L5 19" /></svg>
         </button>
-        <p className="mt-8 mb-4 text-2xl font-semibold tracking-widest uppercase">Menú</p>
+        <p className="font-logo mt-8 mb-4 text-3xl font-medium tracking-[0.15em] uppercase">Menú</p>
 
         <form
           onSubmit={(e) => {
