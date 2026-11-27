@@ -19,8 +19,11 @@ const input = "w-full border border-neutral-300 px-3 py-2 outline-none focus:bor
 const button = "w-full bg-black py-3 text-sm font-bold text-white uppercase disabled:bg-neutral-400";
 const RESEND_SECONDS = 60;
 
-/** Login con límite de intentos, mensajes genéricos y recuperación por mail. */
-export function Login() {
+/**
+ * Login con límite de intentos, mensajes genéricos y recuperación por mail.
+ * `destino`: página a la que lleva el link del mail de recuperación (panel o Mi cuenta).
+ */
+export function Login({ destino = "/admin" }: { destino?: string }) {
   const [view, setView] = useState<"login" | "forgot" | "sent">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -59,6 +62,11 @@ export function Login() {
     if (!error) return resetAttempts();
 
     setPassword("");
+    // Supabase solo lo devuelve si la contraseña es correcta pero falta confirmar el email
+    if (error.code === "email_not_confirmed") {
+      setError("Todavía no confirmaste tu email. Abrí el mail que te enviamos (revisá también spam) y volvé a intentar.");
+      return;
+    }
     if (error.status === 429) {
       setError("Demasiados intentos. Esperá unos minutos o restablecé tu contraseña.");
       return;
@@ -80,7 +88,7 @@ export function Login() {
     if (!EMAIL_RE.test(value)) return setError("Ingresá un email válido.");
     setBusy(true);
     // A propósito no mostramos si el email existe o no
-    await getSupabase()!.auth.resetPasswordForEmail(value, { redirectTo: `${window.location.origin}/admin` });
+    await getSupabase()!.auth.resetPasswordForEmail(value, { redirectTo: `${window.location.origin}${destino}` });
     setBusy(false);
     setCooldown(RESEND_SECONDS);
     setView("sent");
@@ -123,7 +131,7 @@ export function Login() {
   );
 }
 
-function PasswordChecklist({ value }: { value: string }) {
+export function PasswordChecklist({ value }: { value: string }) {
   return (
     <ul className="space-y-0.5 text-xs">
       {checkPassword(value).map((r) => (
