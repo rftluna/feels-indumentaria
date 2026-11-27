@@ -11,6 +11,7 @@ import { useEsAdmin, useSesion, type DatosCuenta } from "@/lib/use-sesion";
 import type { Order } from "@/lib/types";
 import { ChangePassword, Login } from "@/components/auth-forms";
 import { RegistroForm } from "@/components/registro-form";
+import { Privacidad } from "./privacidad";
 
 const input = "w-full border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-black";
 const titulo = "mb-4 border-b border-neutral-200 pb-2 text-sm font-semibold tracking-[0.15em] uppercase";
@@ -90,6 +91,7 @@ function Cuenta({ user, datos, esAdmin }: { user: User; datos: DatosCuenta; esAd
             </button>
             {clave && <div className="mt-4"><ChangePassword email={user.email ?? ""} /></div>}
           </div>
+          <Privacidad user={user} datos={datos} />
         </section>
         <section>
           <MisCompras userId={user.id} />

@@ -28,7 +28,11 @@ export function CookieBanner() {
   if (!show) return null;
   return (
     <div className="fixed inset-x-0 bottom-0 z-40 flex flex-col items-center justify-center gap-3 bg-black/90 px-4 py-3 text-xs text-white md:flex-row">
-      <span>Al navegar por este sitio aceptás el uso de cookies para agilizar tu experiencia de compra.</span>
+      {/* Aviso informativo: el sitio no usa cookies de seguimiento, así que no hace falta pedir consentimiento */}
+      <span>
+        No usamos cookies de seguimiento: solo guardamos tu carrito y tu sesión en este navegador.{" "}
+        <a href="/info#privacidad" className="underline">Política de privacidad</a>
+      </span>
       <button
         onClick={() => { localStorage.setItem("cookies-ok", "1"); setShow(false); }}
         className="border border-white px-4 py-1 font-bold uppercase hover:bg-white hover:text-black"

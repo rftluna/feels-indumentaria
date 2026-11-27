@@ -20,3 +20,7 @@ updates:
       # @types/node tiene que coincidir con la versión de Node donde corre el sitio (no la última)
       - dependency-name: "@types/node"
         update-types: ["version-update:semver-major"]
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"

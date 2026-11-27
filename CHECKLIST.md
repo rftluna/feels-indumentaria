@@ -30,7 +30,7 @@ Estado en Feels Indumentaria: ✅ hecho · 🟡 parcial / se verifica después d
 | A15 | Recuperar contraseña por mail, con espera entre envíos | ✅ |
 | A16 | Pedir la contraseña actual antes de cambiarla | ✅ |
 | A17 | Cierre de sesión automático por inactividad | ✅ |
-| A18 | Registro público desactivado (solo cuentas creadas a mano) | ✅ en el README; se configura en Supabase |
+| A18 | Cuentas de clientas con email confirmado; el panel solo para la tabla `admins` | ✅ se configura en Supabase |
 | A19 | Headers de seguridad (CSP, anti-clickjacking, HSTS, nosniff…) y admin con noindex | ✅ |
 | A20 | Dependencias auditadas (`npm audit`) + Dependabot | ✅ |
 
@@ -71,3 +71,17 @@ Estado en Feels Indumentaria: ✅ hecho · 🟡 parcial / se verifica después d
 
 - A (20) + B nuevos (17, porque B3 y B17 repiten A y B4 está incluido en A19) + C (3) = **40 puntos**.
 - En Feels Indumentaria: **37 hechos**, 2 se verifican después del deploy (B12, B16) y 1 es opcional (B19).
+
+## D. Hardening (SOC 2 · ISO 27001 · ISO 27701)
+
+| # | Punto | Feels Indumentaria |
+|---|---|---|
+| D1 | Registro de actividad inalterable de acciones de administración | ✅ `supabase/hardening.sql` + pestaña Actividad |
+| D2 | Minimizar datos personales en registros | ✅ solo cambios de estado |
+| D3 | Derecho de acceso: descargar mis datos | ✅ Mi cuenta |
+| D4 | Derecho de supresión: eliminar mi cuenta | ✅ Mi cuenta |
+| D5 | Política de privacidad con plazos, proveedores y derechos | ✅ `/info#privacidad` |
+| D6 | CI con lint, tipos, build y auditoría de dependencias | ✅ `.github/workflows/ci.yml` |
+| D7 | 2FA en GitHub, Vercel y Supabase | 🟡 se activa en cada servicio |
+| D8 | Copias de seguridad y prueba de restauración | 🟡 manual (plan Free) |
+| D9 | Protección de `main` y secret scanning en GitHub | 🟡 se activa en GitHub |

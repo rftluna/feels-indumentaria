@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { STORE, shortPrice } from "@/lib/config";
 import { faq } from "@/lib/faq";
+import { creditos } from "@/lib/creditos";
 
 export const metadata = {
   title: "Información legal",
@@ -19,13 +20,18 @@ const sections: [string, string, string[]][] = [
     `La compra mínima para pedidos con envío es de ${shortPrice(STORE.minOrder)}. El envío se realiza por Vía Cargo o el transporte que elijas, y su costo lo abona quien compra.`,
     "Los precios están expresados en pesos argentinos e incluyen IVA. Las promociones aplican por producto y no son acumulables con otras ofertas.",
     "Nos reservamos el derecho de cancelar pedidos con datos falsos o sin stock disponible, devolviendo el stock reservado.",
+    "Cuentas: podés crear una cuenta para ver tus compras. Sos responsable de mantener tu contraseña en secreto. Podemos suspender cuentas usadas de forma indebida, y vos podés eliminar la tuya cuando quieras desde Mi cuenta.",
   ]],
   ["privacidad", "Política de privacidad", [
-    "Datos que guardamos: nombre, email, teléfono y dirección de envío de cada pedido, y el email de quienes se suscriben al newsletter.",
-    "Para qué los usamos: solo para procesar y enviar tu pedido y, si te suscribiste, para enviarte novedades. No los vendemos ni compartimos con terceros.",
-    "Dónde se guardan: en una base de datos de Supabase protegida con reglas de acceso; solo la administración de la tienda puede verlos.",
-    "Cookies: el sitio no usa cookies de terceros ni de seguimiento. El carrito se guarda en el almacenamiento local de tu navegador.",
-    "Tus derechos (Ley 25.326): podés pedir acceder, corregir o borrar tus datos escribiéndonos por WhatsApp o por email. La Agencia de Acceso a la Información Pública es el órgano de control.",
+    `Responsable: ${STORE.name}. Contacto para temas de datos personales: WhatsApp ${STORE.whatsappLocal}.`,
+    "Datos que guardamos: de cada pedido, nombre, email, teléfono y dirección de envío; si creás una cuenta, tu email, tu nombre, teléfono y dirección (la contraseña la guarda cifrada nuestro proveedor de autenticación: nadie de la tienda puede verla); si te suscribís al newsletter, tu email.",
+    "Para qué los usamos: para procesar, cobrar y enviar tu pedido; para que veas tus compras en Mi cuenta; y, si te suscribiste, para enviarte novedades. No los vendemos ni los usamos para publicidad de terceros.",
+    "Base legal: la compra que pedís (contrato) y tu consentimiento al crear la cuenta o suscribirte. Podés retirar el consentimiento cuando quieras.",
+    "Cuánto tiempo los guardamos: los pedidos, 10 años por obligaciones contables (art. 328 del Código Civil y Comercial); la cuenta, hasta que la elimines; el newsletter, hasta que pidas la baja.",
+    "Quién los procesa: Supabase (base de datos y cuentas) y Vercel (alojamiento de la web), con servidores fuera de Argentina y medidas de seguridad propias. Solo la administración de la tienda accede a los pedidos.",
+    "Cómo los protegemos: conexión cifrada (HTTPS), reglas de acceso en la base (cada clienta ve solo sus pedidos), contraseñas seguras y cierre de sesión por inactividad en el panel, y registro de cada cambio hecho por la administración.",
+    "Cookies: el sitio no usa cookies de terceros ni de seguimiento. El carrito y la sesión de tu cuenta se guardan en el almacenamiento local de tu navegador. El mapa de \u201cDónde estamos\u201d es de Google Maps y se carga solo si tocás \u201cVer mapa\u201d: en ese caso Google puede usar sus propias cookies.",
+    "Tus derechos (Ley 25.326): acceder, corregir y eliminar tus datos. Desde Mi cuenta podés editarlos, descargar una copia y eliminar tu cuenta; también podés pedirlo por WhatsApp. Respondemos los pedidos de acceso en hasta 10 días corridos y los de corrección o eliminación en hasta 5 días hábiles. La Agencia de Acceso a la Información Pública es el órgano de control y recibe denuncias por incumplimientos.",
   ]],
 ];
 
@@ -52,6 +58,17 @@ export default function Info() {
           {paragraphs.map((p) => <p key={p} className="mt-3 text-neutral-700">{p}</p>)}
         </section>
       ))}
+      <section id="creditos" className="scroll-mt-40">
+        <h2 className="text-xl font-bold tracking-wider uppercase">Licencias y créditos</h2>
+        <dl className="mt-3 space-y-3">
+          {creditos.map(([titulo, texto]) => (
+            <div key={titulo}>
+              <dt className="font-semibold">{titulo}</dt>
+              <dd className="text-neutral-700">{texto}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
       <Link href="/arrepentimiento" className="inline-block border border-black px-6 py-3 text-xs font-bold tracking-widest uppercase hover:bg-black hover:text-white">
         Botón de arrepentimiento
       </Link>
