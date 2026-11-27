@@ -9,6 +9,7 @@ import type { Category, Order, Product } from "@/lib/types";
 import { arbolCategorias, normalizarCategoria } from "@/lib/categorias";
 import { ChangePassword, Login } from "@/components/auth-forms";
 import { CategoriasAdmin } from "./categorias-admin";
+import { ActividadAdmin } from "./actividad-admin";
 import { FotosAdmin } from "./fotos-admin";
 import { ProductoForm } from "./producto-form";
 import Image from "next/image";
@@ -113,7 +114,7 @@ function Shell({ children }: { children: React.ReactNode }) {
 
 function Dashboard({ email }: { email: string }) {
   const sb = getSupabase()!;
-  const [tab, setTab] = useState<"orders" | "products" | "categories" | "photos" | "withdrawals" | "access">("orders");
+  const [tab, setTab] = useState<"orders" | "products" | "categories" | "photos" | "withdrawals" | "activity" | "access">("orders");
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -183,15 +184,17 @@ function Dashboard({ email }: { email: string }) {
       </div>
 
       <div className="mb-4 flex flex-wrap gap-2 text-xs font-bold uppercase">
-        {(["orders", "products", "categories", "photos", "withdrawals", "access"] as const).map((t) => (
+        {(["orders", "products", "categories", "photos", "withdrawals", "activity", "access"] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)} className={`border px-4 py-2 ${tab === t ? "bg-black text-white" : "border-neutral-300"}`}>
-            {{ orders: "Pedidos", products: "Productos", categories: "Categorías", photos: "Fotos", withdrawals: `Arrepentimientos (${withdrawals.filter((w) => w.status === "pendiente").length})`, access: "Acceso" }[t]}
+            {{ orders: "Pedidos", products: "Productos", categories: "Categorías", photos: "Fotos", withdrawals: `Arrepentimientos (${withdrawals.filter((w) => w.status === "pendiente").length})`, activity: "Actividad", access: "Acceso" }[t]}
           </button>
         ))}
       </div>
 
       {tab === "access" ? (
         <ChangePassword email={email} />
+      ) : tab === "activity" ? (
+        <ActividadAdmin sb={sb} />
       ) : tab === "categories" ? (
         <CategoriasAdmin sb={sb} categorias={categories} products={products} onChange={load} />
       ) : tab === "photos" ? (
